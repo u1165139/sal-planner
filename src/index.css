@@ -48,7 +48,7 @@ body {
 /* ── Two-panel shell ── */
 .app-shell {
   display: grid;
-  grid-template-columns: 520px 1fr;
+  grid-template-columns: 35% 1fr;
   min-height: 100vh;
 }
 @media (max-width: 960px) {
@@ -291,17 +291,20 @@ body {
 .tax-row-value { color: var(--panel-text); font-weight: 600; }
 .tax-row-value.negative { color: #f87171; }
 .tax-row-value.positive { color: #4ade80; }
-.tax-row-value.gold { color: #a78bfa; }
+.tax-row-value.gold { color: #fbbf24; }
 .tax-total {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 0 0;
-  margin-top: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  margin-top: 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 6px;
 }
-.tax-total-label { color: var(--panel-text); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.04em; }
+.tax-total-label { color: #fbbf24; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.04em; }
 
 /* ── Metric grid ── */
 .metric-card {
