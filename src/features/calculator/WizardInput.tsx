@@ -137,6 +137,7 @@ export function WizardInput() {
                 const next = !newJoint;
                 setNewJoint(next);
                 set('jointOwnership')(next);
+                if (next) set('hasSpouse')(true);
               },
               renderJointBody('Each person claims half the deductible loss on their own tax return.')
             )}
@@ -161,6 +162,8 @@ export function WizardInput() {
               set('optimiseFamilyTax')(false);
               set('spouseOtherIncome')(0);
               set('spouseExternalSuperContribution')(0);
+              set('jointOwnership')(false);
+              setNewJoint(false);
             }
           }}
         >
