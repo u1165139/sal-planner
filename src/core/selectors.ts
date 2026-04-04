@@ -67,7 +67,7 @@ export const selectPersonalTaxBreakdown = createSelector(
       interestIncome: inputs.interestIncome,
       propertyIncome: inputs.propertyIncome,
       basePersonalTaxableIncome: results.basePersonalTaxableIncome,
-      annualAdditionalPurchaseLoss: results.annualAdditionalPurchaseLoss,
+      annualDeductibleInvestmentLoss: results.annualDeductibleInvestmentLoss,
       totalPersonalTaxableIncome: results.totalPersonalTaxableIncome,
       personalTaxTotal: results.personalTaxTotal,
       negativeGearingRefund: results.negativeGearingRefund,
@@ -87,7 +87,7 @@ export const selectCashFlowSummary = createSelector(
       totalCashAvailable: results.totalCashAvailable,
       monthlyLiving: inputs.monthlyLiving,
       monthlyRepayments: inputs.monthlyRepayments,
-      monthlyAdditionalPurchase: inputs.monthlyAdditionalPurchase,
+      monthlyDeductibleInvestmentLoss: inputs.monthlyDeductibleInvestmentLoss,
       requiredAnnualCash: results.requiredAnnualCash,
       cashSurplusDeficit: results.cashSurplusDeficit,
     };

@@ -17,8 +17,8 @@ export function PersonalTaxBreakdown() {
         <div className="tax-row"><span className="tax-row-label">+ Interest Income</span><span className="tax-row-value">{fmt(breakdown.interestIncome)}</span></div>
         <div className="tax-row"><span className="tax-row-label">+ Property Income</span><span className="tax-row-value">{fmt(breakdown.propertyIncome)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Gross Taxable Income</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary + breakdown.basePersonalTaxableIncome)}</span></div>
-        {breakdown.annualAdditionalPurchaseLoss > 0 && (
-          <div className="tax-row"><span className="tax-row-label">Less: NG Loss (Additional Purchase)</span><span className="tax-row-value negative">−{fmt(breakdown.annualAdditionalPurchaseLoss)}</span></div>
+        {breakdown.annualDeductibleInvestmentLoss > 0 && (
+          <div className="tax-row"><span className="tax-row-label">Less: Deductible Investment Loss</span><span className="tax-row-value negative">−{fmt(breakdown.annualDeductibleInvestmentLoss)}</span></div>
         )}
         <div className="tax-row"><span className="tax-row-label">Net Taxable Income</span><span className="tax-row-value">{fmt(breakdown.totalPersonalTaxableIncome)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Income Tax + Medicare</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxTotal)}</span></div>

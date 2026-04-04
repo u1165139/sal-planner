@@ -49,8 +49,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   // ── Base calculations ──────────────────────────────────────────────────────
   const businessRevenue = businessIncomeGST / 1.1;
   const netBusinessProfit = businessRevenue - deductibleExpenses;
-  // Note: The investment loss is a paper loss, not a cash expense, so it's not in requiredAnnualCash.
-  const requiredAnnualCash = (monthlyLiving + monthlyRepayments) * 12;
+  const requiredAnnualCash = (monthlyLiving + monthlyRepayments + monthlyDeductibleInvestmentLoss) * 12;
   const basePersonalTaxableIncome = interestIncome + propertyIncome;
 
   // ── Negative gearing on investment loss ────────────────────────────────
@@ -123,7 +122,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     availableNonSalaryCash: ensureNumber(availableNonSalaryCash),
     cashShortfall: ensureNumber(cashShortfall),
     basePersonalTaxableIncome: ensureNumber(basePersonalTaxableIncome),
-    annualAdditionalPurchaseLoss: ensureNumber(annualDeductibleInvestmentLoss),
+    annualDeductibleInvestmentLoss: ensureNumber(annualDeductibleInvestmentLoss),
     negativeGearingRefund: ensureNumber(negativeGearingRefund),
     recommendedSalary: ensureNumber(recommendedSalary),
     superContribution: ensureNumber(superContribution),

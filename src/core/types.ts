@@ -19,7 +19,7 @@ export interface CalcResults {
   cashShortfall: number;
   basePersonalTaxableIncome: number;
   // Negative gearing
-  annualAdditionalPurchaseLoss: number;
+  annualDeductibleInvestmentLoss: number;
   negativeGearingRefund: number;
   // Recommended salary
   recommendedSalary: number;

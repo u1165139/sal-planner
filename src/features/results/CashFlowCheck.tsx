@@ -31,7 +31,7 @@ export function CashFlowCheck() {
             <div className="cashflow-col-title">Cash Required</div>
             <div className="cashflow-item"><span className="cashflow-item-label">Annual Living Expenses</span><span className="cashflow-item-value">{fmt(summary.monthlyLiving * 12)}</span></div>
             <div className="cashflow-item"><span className="cashflow-item-label">Annual Extra Repayments</span><span className="cashflow-item-value">{fmt(summary.monthlyRepayments * 12)}</span></div>
-            <div className="cashflow-item"><span className="cashflow-item-label">Annual Additional Purchase</span><span className="cashflow-item-value">{fmt(summary.monthlyAdditionalPurchase * 12)}</span></div>
+            <div className="cashflow-item"><span className="cashflow-item-label">Annual Investment Out-of-Pocket</span><span className="cashflow-item-value">{fmt(summary.monthlyDeductibleInvestmentLoss * 12)}</span></div>
             <div className="cashflow-total"><span>Total</span><span>{fmt(summary.requiredAnnualCash)}</span></div>
           </div>
         </div>
