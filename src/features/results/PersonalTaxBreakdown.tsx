@@ -108,15 +108,29 @@ function PersonColumn({
         })()}
 
         {afterTaxSalary !== undefined && (
-          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
-            <span className="tax-row-label">After-tax salary</span>
-            <span className="tax-row-value positive">{fmt(afterTaxSalary)}</span>
+          <>
+            <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid rgba(167,139,250,0.2)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
+              <span className="tax-row-label" style={{ fontWeight: 600 }}>After-tax salary</span>
+              <span className="tax-row-value positive" style={{ fontWeight: 600 }}>{fmt(afterTaxSalary)}</span>
+            </div>
+            {afterTaxTotal !== afterTaxSalary && (
+              <div className="tax-row" style={{ borderBottom: 'none', padding: '0.05rem 0' }}>
+                <span className="tax-row-label" style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>
+                  incl. property &amp; NG effects
+                </span>
+                <span className="tax-row-value" style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>
+                  {fmt(afterTaxTotal)}
+                </span>
+              </div>
+            )}
+          </>
+        )}
+        {afterTaxSalary === undefined && (
+          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid rgba(167,139,250,0.2)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
+            <span className="tax-row-label" style={{ fontWeight: 600 }}>After-tax income</span>
+            <span className="tax-row-value positive" style={{ fontWeight: 600 }}>{fmt(afterTaxTotal)}</span>
           </div>
         )}
-        <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid rgba(167,139,250,0.2)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
-          <span className="tax-row-label">After-tax income (all sources)</span>
-          <span className="tax-row-value positive">{fmt(afterTaxTotal)}</span>
-        </div>
       </div>
     </div>
   );
