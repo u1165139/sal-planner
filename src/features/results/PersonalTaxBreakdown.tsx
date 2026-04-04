@@ -24,7 +24,7 @@ export function PersonalTaxBreakdown() {
 
         <h4 style={{ margin: '1rem 0 0.5rem', fontSize: '0.85rem', color: 'var(--panel-text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tax & Adjustments</h4>
         {breakdown.annualDeductibleInvestmentLoss > 0 && (
-          <div className="tax-row"><span className="tax-row-label">Less: Deductible Investment Loss</span><span className="tax-row-value negative">−{fmt(breakdown.annualDeductibleInvestmentLoss)}</span></div>
+          <div className="tax-row"><span className="tax-row-label">Less: Deductible Investment Loss{breakdown.isSplit ? ' (50% Share)' : ''}</span><span className="tax-row-value negative">−{fmt(breakdown.annualDeductibleInvestmentLoss)}</span></div>
         )}
         <div className="tax-row"><span className="tax-row-label">Net Taxable Income</span><span className="tax-row-value">{fmt(breakdown.totalPersonalTaxableIncome)}</span></div>
         {breakdown.negativeGearingRefund > 0 || breakdown.drawDividend ? (

@@ -20,7 +20,7 @@ export function CashFlowCheck() {
             <div className="cashflow-item"><span className="cashflow-item-label">Interest Income</span><span className="cashflow-item-value">{fmt(summary.interestIncome)}</span></div>
             {summary.negativeGearingRefund > 0 && (
               <div className="cashflow-item">
-                <span className="cashflow-item-label">NG Tax Refund</span>
+                <span className="cashflow-item-label">Investment Tax Credits (50/50 Split)</span>
                 <span className="cashflow-item-value highlight">+{fmt(summary.negativeGearingRefund)}</span>
               </div>
             )}
@@ -31,7 +31,7 @@ export function CashFlowCheck() {
             <div className="cashflow-col-title">Cash Required</div>
             <div className="cashflow-item"><span className="cashflow-item-label">Annual Living Expenses</span><span className="cashflow-item-value">{fmt(summary.monthlyLiving * 12)}</span></div>
             <div className="cashflow-item"><span className="cashflow-item-label">Annual Extra Repayments</span><span className="cashflow-item-value">{fmt(summary.monthlyRepayments * 12)}</span></div>
-            <div className="cashflow-item"><span className="cashflow-item-label">Annual Investment Out-of-Pocket</span><span className="cashflow-item-value">{fmt(summary.monthlyDeductibleInvestmentLoss * 12)}</span></div>
+            <div className="cashflow-item"><span className="cashflow-item-label">New Property Holding Cost</span><span className="cashflow-item-value">{fmt(summary.monthlyDeductibleInvestmentLoss * 12)}</span></div>
             <div className="cashflow-total"><span>Total</span><span>{fmt(summary.requiredAnnualCash)}</span></div>
           </div>
         </div>
@@ -41,6 +41,9 @@ export function CashFlowCheck() {
         <span className={`surplus-value ${summary.cashSurplusDeficit >= 0 ? 'pos' : 'neg'}`}>
           {summary.cashSurplusDeficit >= 0 ? '+' : ''}{fmt(summary.cashSurplusDeficit)}
         </span>
+      </div>
+      <div style={{ fontSize: '0.65rem', color: 'var(--panel-text-dim)', marginTop: '0.8rem', textAlign: 'center' }}>
+        Property Income is excluded from available cash as it is allocated to existing loan repayments.
       </div>
     </div>
   );

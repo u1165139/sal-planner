@@ -71,17 +71,18 @@ export const selectPersonalTaxBreakdown = createSelector(
       interestIncome: inputs.interestIncome,
       propertyIncome: inputs.propertyIncome,
       basePersonalTaxableIncome: results.basePersonalTaxableIncome,
-      annualDeductibleInvestmentLoss: results.annualDeductibleInvestmentLoss,
+      annualDeductibleInvestmentLoss: results.ownerDeductibleInvestmentLoss,
       totalPersonalTaxableIncome: results.totalPersonalTaxableIncome,
-      taxBeforeDeduction: results.personalTaxTotal + results.negativeGearingRefund + results.frankingCredit,
+      taxBeforeDeduction: results.personalTaxTotal + results.ownerNegativeGearingRefund + results.frankingCredit,
       personalTaxTotal: results.personalTaxTotal,
-      negativeGearingRefund: results.negativeGearingRefund,
+      negativeGearingRefund: results.ownerNegativeGearingRefund,
       effectivePersonalRate: results.effectivePersonalRate,
       drawDividend: inputs.drawDividend,
       grossedUpDividend: results.grossedUpDividend,
       frankingCredit: results.frankingCredit,
       personalTaxOnSalary: results.personalTaxOnSalary,
       afterTaxSalary: results.afterTaxSalary,
+      isSplit: inputs.enableSpouseSplitting,
     };
   }
 );

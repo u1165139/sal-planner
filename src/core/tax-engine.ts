@@ -61,6 +61,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
   // ── Negative gearing on investment loss ────────────────────────────────
   const annualDeductibleInvestmentLoss = monthlyDeductibleInvestmentLoss * 12;
+  const splitLossOwner = inputs.enableSpouseSplitting ? annualDeductibleInvestmentLoss / 2 : annualDeductibleInvestmentLoss;
+  const splitLossSpouse = inputs.enableSpouseSplitting ? annualDeductibleInvestmentLoss / 2 : 0;
 
   const findBestSplit = (totalSalary: number) => {
     let bestO = totalSalary;
@@ -69,8 +71,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
     const evaluate = (o: number) => {
       const s = totalSalary - o;
-      const taxO = calcTotalPersonalTax(Math.max(0, o + basePersonalTaxableIncome - annualDeductibleInvestmentLoss));
-      const taxS = calcTotalPersonalTax(s + spouseBase);
+      const taxO = calcTotalPersonalTax(Math.max(0, o + basePersonalTaxableIncome - splitLossOwner));
+      const taxS = calcTotalPersonalTax(Math.max(0, s + spouseBase - splitLossSpouse));
       return taxO + taxS;
     };
 
@@ -117,21 +119,27 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
     const grossIncome = ownerSal + basePersonalTaxableIncome;
     const taxWithout = calcTotalPersonalTax(grossIncome);
-    const taxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
-    const ngRefund = taxWithout - taxWith;
+    const taxWith = calcTotalPersonalTax(Math.max(0, grossIncome - splitLossOwner));
+    const ngRefundOwner = taxWithout - taxWith;
+    
     const taxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
     const personalTaxOnSalary = taxWithout - taxOnBaseOnly;
     const afterTaxOwner = ownerSal - personalTaxOnSalary;
 
     let afterTaxSpouse = 0;
+    let ngRefundSpouse = 0;
     if (inputs.enableSpouseSplitting) {
       const sGross = spouseSal + (inputs.spouseOtherIncome || 0);
-      const sTax = calcTotalPersonalTax(sGross);
+      const sTaxWithout = calcTotalPersonalTax(sGross);
+      const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
+      ngRefundSpouse = sTaxWithout - sTaxWith;
+      
       const sTaxBase = calcTotalPersonalTax(inputs.spouseOtherIncome || 0);
-      afterTaxSpouse = spouseSal - (sTax - sTaxBase);
+      afterTaxSpouse = spouseSal - (sTaxWithout - sTaxBase);
     }
 
     const afterTax = afterTaxOwner + afterTaxSpouse;
+    const ngRefund = ngRefundOwner + ngRefundSpouse;
     return { afterTax, ngRefund, ownerSal, spouseSal };
   };
 
@@ -187,32 +195,37 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
   const grossIncome = recommendedOwnerSalary + basePersonalTaxableIncome + grossedUpDividend;
   const personalTaxWithout = calcTotalPersonalTax(grossIncome);
-  const personalTaxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
+  const personalTaxWith = calcTotalPersonalTax(Math.max(0, grossIncome - splitLossOwner));
   
   if (inputs.drawDividend) {
-    const baseTaxWithoutDiv = calcTotalPersonalTax(Math.max(0, recommendedOwnerSalary + basePersonalTaxableIncome - annualDeductibleInvestmentLoss));
+    const baseTaxWithoutDiv = calcTotalPersonalTax(Math.max(0, recommendedOwnerSalary + basePersonalTaxableIncome - splitLossOwner));
     dividendTopUpTax = personalTaxWith - baseTaxWithoutDiv - frankingCredit;
   }
 
-  const negativeGearingRefund = personalTaxWithout - personalTaxWith;
+  let spouseNgRefund = 0;
+  let spouseTax = 0;
+  let afterTaxSpouseSalary = 0;
+  if (inputs.enableSpouseSplitting) {
+    const sGross = recommendedSpouseSalary + (inputs.spouseOtherIncome || 0);
+    const sTaxWithout = calcTotalPersonalTax(sGross);
+    const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
+    spouseNgRefund = sTaxWithout - sTaxWith;
+    const sTaxBase = calcTotalPersonalTax(inputs.spouseOtherIncome || 0);
+    spouseTax = sTaxWith - sTaxBase;
+    afterTaxSpouseSalary = recommendedSpouseSalary - (sTaxWithout - sTaxBase);
+  }
+
+  const ownerNegativeGearingRefund = personalTaxWithout - personalTaxWith;
+  const negativeGearingRefund = ownerNegativeGearingRefund + spouseNgRefund;
+
   let personalTaxTotal = personalTaxWith - frankingCredit;
   if (personalTaxTotal < 0) personalTaxTotal = 0;
   
   const personalTaxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
   const personalTaxOnSalary = personalTaxWithout - personalTaxOnBaseOnly;
-  const totalPersonalTaxableIncome = Math.max(0, grossIncome - annualDeductibleInvestmentLoss);
+  const totalPersonalTaxableIncome = Math.max(0, grossIncome - splitLossOwner);
 
   const afterTaxOwnerSalary = recommendedOwnerSalary - personalTaxOnSalary;
-
-  let spouseTax = 0;
-  let afterTaxSpouseSalary = 0;
-  if (inputs.enableSpouseSplitting) {
-    const sGross = recommendedSpouseSalary + (inputs.spouseOtherIncome || 0);
-    const sTax = calcTotalPersonalTax(sGross);
-    const sTaxBase = calcTotalPersonalTax(inputs.spouseOtherIncome || 0);
-    spouseTax = sTax - sTaxBase;
-    afterTaxSpouseSalary = recommendedSpouseSalary - spouseTax;
-  }
 
   const afterTaxSalary = afterTaxOwnerSalary + afterTaxSpouseSalary;
   const totalCashAvailable = afterTaxSalary + availableNonSalaryCash + negativeGearingRefund + netDividend - dividendTopUpTax;
@@ -230,6 +243,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     basePersonalTaxableIncome: ensureNumber(basePersonalTaxableIncome),
     annualDeductibleInvestmentLoss: ensureNumber(annualDeductibleInvestmentLoss),
     negativeGearingRefund: ensureNumber(negativeGearingRefund),
+    ownerDeductibleInvestmentLoss: ensureNumber(splitLossOwner),
+    ownerNegativeGearingRefund: ensureNumber(ownerNegativeGearingRefund),
     recommendedSalary: ensureNumber(recommendedOwnerSalary),
     spouseSalary: ensureNumber(recommendedSpouseSalary),
     superContribution: ensureNumber(superContribution),

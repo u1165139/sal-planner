@@ -23,6 +23,8 @@ export interface CalcResults {
   // Negative gearing
   annualDeductibleInvestmentLoss: number;
   negativeGearingRefund: number;
+  ownerDeductibleInvestmentLoss: number;
+  ownerNegativeGearingRefund: number;
   // Recommended salary
   recommendedSalary: number;
   superContribution: number;
