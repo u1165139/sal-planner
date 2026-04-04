@@ -24,6 +24,12 @@ export function CashFlowCheck() {
                 <span className="cashflow-item-value highlight">+{fmt(summary.negativeGearingRefund)}</span>
               </div>
             )}
+            {summary.drawDividend && (
+              <div className="cashflow-item">
+                <span className="cashflow-item-label">Net Dividend (After Top-up Tax)</span>
+                <span className="cashflow-item-value">{fmt(summary.netDividend - summary.dividendTopUpTax)}</span>
+              </div>
+            )}
             <div className="cashflow-total"><span>Total Net Take-Home (Annual)</span><span style={{ color: '#4ade80' }}>{fmt(summary.totalCashAvailable)}</span></div>
           </div>
           <div className="cashflow-equals">=</div>

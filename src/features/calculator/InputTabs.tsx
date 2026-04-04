@@ -160,13 +160,19 @@ export function InputTabs() {
         </div>
         
         {inputs.enableSpouseSplitting && (
-          <InputField
-            label="Spouse's Other Annual Income"
-            sublabel="Base income before any company salary"
-            value={inputs.spouseOtherIncome}
-            onChange={set('spouseOtherIncome')}
-            error={getError('spouseOtherIncome')}
-          />
+          <>
+            <InputField
+              label="Spouse's Other Annual Income"
+              sublabel="Base income before any company salary"
+              value={inputs.spouseOtherIncome}
+              onChange={set('spouseOtherIncome')}
+              error={getError('spouseOtherIncome')}
+            />
+            <div style={{ marginTop: '0.65rem', padding: '0.6rem', background: 'var(--accent-dim)', borderRadius: '6px', border: '1px dashed var(--accent)', fontSize: '0.71rem', color: 'var(--text-dim)', lineHeight: 1.4 }}>
+              <span style={{ color: 'var(--accent)', fontWeight: 600, marginRight: '4px' }}>ⓘ Note:</span>
+              The optimizer will automatically prioritize filling your spouse's lower tax brackets (starting with the $18,200 tax-free threshold) to maximize family savings.
+            </div>
+          </>
         )}
       </div>
     </>

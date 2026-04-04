@@ -82,7 +82,7 @@ export const selectPersonalTaxBreakdown = createSelector(
       frankingCredit: results.frankingCredit,
       personalTaxOnSalary: results.personalTaxOnSalary,
       afterTaxSalary: results.afterTaxSalary,
-      isSplit: inputs.enableSpouseSplitting,
+      isSplit: inputs.jointOwnership,
     };
   }
 );
@@ -101,6 +101,9 @@ export const selectCashFlowSummary = createSelector(
       monthlyDeductibleInvestmentLoss: inputs.monthlyDeductibleInvestmentLoss,
       requiredAnnualCash: results.requiredAnnualCash,
       cashSurplusDeficit: results.cashSurplusDeficit,
+      drawDividend: inputs.drawDividend,
+      netDividend: results.netDividend,
+      dividendTopUpTax: results.dividendTopUpTax,
     };
   }
 );

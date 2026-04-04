@@ -76,7 +76,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
       return taxO + taxS;
     };
 
-    const steps = 50;
+    const steps = 200;
     for (let i = 0; i <= steps; i++) {
       const o = (totalSalary * i) / steps;
       const tax = evaluate(o);
@@ -187,7 +187,10 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     if (recommendedSpouseSalary > 0) totalCap += SUPER_CAP;
     if (totalCap === 0) totalCap = SUPER_CAP;
 
-    superContribution = Math.min(totalRecommendedSalary * SUPER_RATE, totalCap);
+    superContribution = Math.min((recommendedOwnerSalary + recommendedSpouseSalary) * SUPER_RATE, totalCap);
+  } else {
+    // Enforce base SGC calculation for salaries drawn
+    superContribution = (recommendedOwnerSalary + recommendedSpouseSalary) * SUPER_RATE;
   }
 
   // ── Final tax calculations ─────────────────────────────────────────────────
@@ -231,7 +234,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const ownerNegativeGearingRefund = personalTaxWithout - personalTaxWith;
   const negativeGearingRefund = ownerNegativeGearingRefund + spouseNgRefund;
 
-  let personalTaxTotal = personalTaxWith - frankingCredit;
+  const personalTaxTotal = personalTaxWith - frankingCredit;
   
   const personalTaxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
   const personalTaxOnSalary = personalTaxWithout - personalTaxOnBaseOnly;
