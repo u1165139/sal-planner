@@ -53,32 +53,9 @@ export function WizardInput() {
   );
 
   const renderJointBody = (explanation: string) => (
-    <>
-      <div style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '0.75rem' }}>
-        {explanation}
-      </div>
-      {renderInput("Spouse's employment income", 'Their salary or wages from their regular job', 'spouseOtherIncome', '/ yr')}
-      {inputs.maximiseSuper && (
-        <>
-          <InputField
-            label="Spouse's employer super (annual)"
-            sublabel="SGC already paid by their regular employer"
-            value={inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : Math.round((inputs.spouseOtherIncome || 0) * 0.12)}
-            onChange={set('spouseExternalSuperContribution')}
-          />
-          <div className="info-box" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
-            We estimate this as 12% of your spouse's employment income. Only override if their employer pays a different rate.
-          </div>
-        </>
-      )}
-      <div className="toggle-row" style={{ padding: '0.4rem 0.6rem', marginTop: '0.5rem', borderRadius: '6px', cursor: 'pointer' }} onClick={() => set('optimiseFamilyTax')(!inputs.optimiseFamilyTax)}>
-        <div>
-          <div className="toggle-label">Pay spouse to reduce family tax</div>
-          <div className="toggle-sublabel">If your tax bracket is higher than your spouse's, suggests an optimal extra salary to pay them from company profit</div>
-        </div>
-        <div className={`toggle-switch ${inputs.optimiseFamilyTax ? 'on' : ''}`} />
-      </div>
-    </>
+    <div style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '0.25rem' }}>
+      {explanation}
+    </div>
   );
 
   return (
@@ -159,12 +136,53 @@ export function WizardInput() {
               () => {
                 const next = !newJoint;
                 setNewJoint(next);
-                const turningOn = next;
-                set('jointOwnership')(turningOn);
+                set('jointOwnership')(next);
               },
               renderJointBody('Each person claims half the deductible loss on their own tax return.')
             )}
           </>
+        )}
+      </div>
+
+      {/* ── Spouse & family ── */}
+      <div className="form-section">
+        <div className="section-label">
+          <div className="section-label-title">Spouse &amp; family</div>
+          <div className="section-label-sub">Model the impact of your spouse's income on family tax</div>
+        </div>
+
+        {renderInput("Spouse's employment income", 'Their salary or wages from their regular job', 'spouseOtherIncome', '/ yr')}
+
+        {inputs.maximiseSuper && (
+          <>
+            <InputField
+              label="Spouse's employer super (annual)"
+              sublabel="SGC already paid by their regular employer"
+              value={inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : Math.round((inputs.spouseOtherIncome || 0) * 0.12)}
+              onChange={set('spouseExternalSuperContribution')}
+            />
+            <div className="info-box" style={{ marginTop: '0.4rem', marginBottom: '0.5rem' }}>
+              We estimate this as 12% of your spouse's employment income. Only override if their employer pays a different rate.
+            </div>
+          </>
+        )}
+
+        <div
+          className="toggle-row"
+          style={{ padding: '0.4rem 0.6rem', marginTop: '0.5rem', borderRadius: '6px', cursor: 'pointer' }}
+          onClick={() => set('optimiseFamilyTax')(!inputs.optimiseFamilyTax)}
+        >
+          <div>
+            <div className="toggle-label">Pay spouse to reduce family tax</div>
+            <div className="toggle-sublabel">If your tax bracket is higher than your spouse's, suggests an optimal extra salary to pay them from company profit</div>
+          </div>
+          <div className={`toggle-switch ${inputs.optimiseFamilyTax ? 'on' : ''}`} />
+        </div>
+
+        {inputs.jointOwnership && (
+          <div className="info-box" style={{ marginTop: '0.5rem' }}>
+            Joint property ownership is on — the investment loss and rental income are split 50/50 on your tax returns.
+          </div>
         )}
       </div>
 
