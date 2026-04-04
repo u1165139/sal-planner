@@ -291,7 +291,7 @@ body {
 .tax-row-value { color: var(--panel-text); font-weight: 600; }
 .tax-row-value.negative { color: #f87171; }
 .tax-row-value.positive { color: #4ade80; }
-.tax-row-value.gold { color: #fbbf24; }
+.tax-row-value.gold { color: #a78bfa; }
 .tax-total {
   display: flex;
   align-items: center;
@@ -300,11 +300,11 @@ body {
   margin-top: 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
-  background: rgba(251, 191, 36, 0.12);
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: rgba(167, 139, 250, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.3);
   border-radius: 6px;
 }
-.tax-total-label { color: #fbbf24; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.04em; }
+.tax-total-label { color: var(--panel-text); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.04em; }
 
 /* ── Metric grid ── */
 .metric-card {
