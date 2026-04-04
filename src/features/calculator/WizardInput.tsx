@@ -141,7 +141,7 @@ export function WizardInput() {
             set('hasSpouse')(next);
             if (!next) {
               set('optimiseFamilyTax')(false);
-              set('spouseOtherIncome')(0);
+              set('spouseOtherIncome')(100000);
               set('spouseExternalSuperContribution')(0);
               set('jointOwnership')(false);
             }
