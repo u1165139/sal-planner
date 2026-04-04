@@ -153,6 +153,12 @@ export function WizardInput() {
 
         {renderInput("Spouse's employment income", 'Their salary or wages from their regular job', 'spouseOtherIncome', '/ yr')}
 
+        {inputs.spouseOtherIncome > 0 && !inputs.jointOwnership && (
+          <div className="info-box" style={{ marginTop: '0.5rem' }}>
+            To activate spouse tax calculations and the family optimisation, turn on <strong>"Would this property be jointly owned with your spouse?"</strong> in the New property scenario section above.
+          </div>
+        )}
+
         {inputs.maximiseSuper && (
           <>
             <InputField

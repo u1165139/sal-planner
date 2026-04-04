@@ -208,7 +208,7 @@ export function PersonalTaxBreakdown() {
               mandatorySuper={results.spouseSalary * SUPER_RATE}
               voluntarySuper={results.spouseVoluntaryContribution}
               externalSGC={inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : (inputs.spouseOtherIncome || 0) * SUPER_RATE}
-              afterTaxSalary={results.afterTaxSpouseSalary}
+              afterTaxSalary={results.spouseSalary > 0 ? results.afterTaxSpouseSalary : undefined}
             />
           </>
         )}
