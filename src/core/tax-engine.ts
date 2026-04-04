@@ -61,8 +61,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
   // ── Negative gearing on investment loss ────────────────────────────────
   const annualDeductibleInvestmentLoss = monthlyDeductibleInvestmentLoss * 12;
-  const splitLossOwner = inputs.enableSpouseSplitting ? annualDeductibleInvestmentLoss / 2 : annualDeductibleInvestmentLoss;
-  const splitLossSpouse = inputs.enableSpouseSplitting ? annualDeductibleInvestmentLoss / 2 : 0;
+  const splitLossOwner = inputs.jointOwnership ? annualDeductibleInvestmentLoss / 2 : annualDeductibleInvestmentLoss;
+  const splitLossSpouse = inputs.jointOwnership ? annualDeductibleInvestmentLoss / 2 : 0;
 
   const findBestSplit = (totalSalary: number) => {
     let bestO = totalSalary;
@@ -128,7 +128,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
     let afterTaxSpouse = 0;
     let ngRefundSpouse = 0;
-    if (inputs.enableSpouseSplitting) {
+    if (inputs.enableSpouseSplitting || inputs.jointOwnership) {
       const sGross = spouseSal + (inputs.spouseOtherIncome || 0);
       const sTaxWithout = calcTotalPersonalTax(sGross);
       const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
@@ -168,13 +168,26 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   // ── Super adjustment ───────────────────────────────────────────────────────
   let superContribution = 0;
   if (maximiseSuper) {
-    // Note: this logic assumes super is prioritized mostly for the owner up to the cap
+    // Calculate total effective cap based on who receives a salary
+    let totalCap = 0;
+    if (recommendedOwnerSalary > 0) totalCap += SUPER_CAP;
+    if (inputs.enableSpouseSplitting && recommendedSpouseSalary > 0) totalCap += SUPER_CAP;
+    // Default to at least one cap if salaries haven't been mapped yet but profit exists
+    if (totalCap === 0) totalCap = SUPER_CAP;
+
     const maxSalaryWithSuper = Math.max(0, netBusinessProfit) / (1 + SUPER_RATE);
     totalRecommendedSalary = Math.min(totalRecommendedSalary, maxSalaryWithSuper);
     const reSplit = computeCash(totalRecommendedSalary);
     recommendedOwnerSalary = reSplit.ownerSal;
     recommendedSpouseSalary = reSplit.spouseSal;
-    superContribution = Math.min(recommendedOwnerSalary * SUPER_RATE, SUPER_CAP);
+
+    // Recalculate cap purely based on finalized split
+    totalCap = 0;
+    if (recommendedOwnerSalary > 0) totalCap += SUPER_CAP;
+    if (recommendedSpouseSalary > 0) totalCap += SUPER_CAP;
+    if (totalCap === 0) totalCap = SUPER_CAP;
+
+    superContribution = Math.min(totalRecommendedSalary * SUPER_RATE, totalCap);
   }
 
   // ── Final tax calculations ─────────────────────────────────────────────────
@@ -205,7 +218,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   let spouseNgRefund = 0;
   let spouseTax = 0;
   let afterTaxSpouseSalary = 0;
-  if (inputs.enableSpouseSplitting) {
+  if (inputs.enableSpouseSplitting || inputs.jointOwnership) {
     const sGross = recommendedSpouseSalary + (inputs.spouseOtherIncome || 0);
     const sTaxWithout = calcTotalPersonalTax(sGross);
     const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
@@ -219,7 +232,6 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const negativeGearingRefund = ownerNegativeGearingRefund + spouseNgRefund;
 
   let personalTaxTotal = personalTaxWith - frankingCredit;
-  if (personalTaxTotal < 0) personalTaxTotal = 0;
   
   const personalTaxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
   const personalTaxOnSalary = personalTaxWithout - personalTaxOnBaseOnly;
@@ -254,7 +266,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     personalTaxTotal: ensureNumber(personalTaxTotal),
     personalTaxOnSalary: ensureNumber(personalTaxOnSalary),
     totalPersonalTaxableIncome: ensureNumber(totalPersonalTaxableIncome),
-    totalTax: ensureNumber(companyTax + personalTaxTotal),
+    totalTax: ensureNumber(companyTax + personalTaxTotal + spouseTax),
     spouseTax: ensureNumber(spouseTax),
     totalFamilyTax: ensureNumber(totalFamilyTax),
     effectivePersonalRate: ensureNumber((personalTaxTotal / grossIncome) * 100),

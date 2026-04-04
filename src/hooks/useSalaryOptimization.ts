@@ -16,6 +16,7 @@ const DEFAULT_INPUTS: CalcInputs = {
   maximiseSuper: false,
   drawDividend: false,
   enableSpouseSplitting: false,
+  jointOwnership: false,
   spouseOtherIncome: 0,
 };
 

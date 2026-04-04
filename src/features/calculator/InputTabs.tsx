@@ -100,6 +100,17 @@ export function InputTabs() {
             onChange={set('propertyIncome')}
             error={getError('propertyIncome')}
           />
+          <div
+            className="toggle-row"
+            onClick={() => set('jointOwnership')(!inputs.jointOwnership)}
+            style={{ marginTop: '0.55rem' }}
+          >
+            <div>
+              <div className="toggle-label">Joint Property Ownership</div>
+              <div className="toggle-sublabel">Splits investment loss 50/50 with your spouse.</div>
+            </div>
+            <div className={`toggle-switch ${inputs.jointOwnership ? 'on' : ''}`} />
+          </div>
         </div>
       )}
 
