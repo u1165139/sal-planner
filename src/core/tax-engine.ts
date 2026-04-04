@@ -225,16 +225,23 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     if (ownerMarginal <= spouseMarginal) {
       familyOptimisationMessage = `No benefit: your marginal rate (${Math.round(ownerMarginal * 100)}%) is not higher than your spouse's current rate (${Math.round(spouseMarginal * 100)}%). Routing salary to your spouse would not reduce family tax.`;
     } else {
-      // The correct approach: shift salary from owner to spouse.
-      // "Required owner after-tax cash" = what the base scenario delivers to the owner.
-      const baseOwnerGross = recommendedOwnerSalary + basePersonalTaxableIncome;
-      const baseOwnerTaxOnSalary = calcTotalPersonalTax(baseOwnerGross) - calcTotalPersonalTax(basePersonalTaxableIncome);
-      const requiredOwnerAfterTaxCash = recommendedOwnerSalary - baseOwnerTaxOnSalary;
+      // The spouse's NG refund from their own income is always present (joint ownership)
+      // and always contributes to the family cash pool regardless of company salary
+      const spouseBaseNgRefund = calcTotalPersonalTax(spouseBase) - calcTotalPersonalTax(Math.max(0, spouseBase - splitLossSpouse));
 
-      // Helper: given a fixed spouse salary from company, find minimum owner salary
-      // that delivers requiredOwnerAfterTaxCash collectively, and return total family tax.
+      // Helper: compute owner's cash (after-tax salary + owner NG refund)
+      // for a given owner salary level
+      const ownerCashFromSalary = (sal: number) => {
+        const og = sal + basePersonalTaxableIncome;
+        const afterTax = sal - (calcTotalPersonalTax(og) - calcTotalPersonalTax(basePersonalTaxableIncome));
+        const ng = calcTotalPersonalTax(og) - calcTotalPersonalTax(Math.max(0, og - splitLossOwner));
+        return afterTax + ng;
+      };
+
+      // For a given spouse company salary, find the minimum owner salary that keeps
+      // total family cash >= requiredAnnualCash, then compute total family tax.
       const evaluateSpouseSalary = (spouseSal: number) => {
-        // 1. Calculate how much net cash the spouse brings home from this salary
+        // Spouse net contribution from company salary (after their marginal tax on it)
         const spouseTotalGross = spouseSal + spouseBase;
         const spouseNetIncome = Math.max(0, spouseTotalGross - splitLossSpouse);
         const spouseTotalTax = calcTotalPersonalTax(spouseNetIncome);
@@ -242,46 +249,40 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
         const extraSpouseTax = spouseTotalTax - spouseTaxBase;
         const spouseNetContrib = spouseSal - extraSpouseTax;
 
-        // 2. Reduce the owner's required cash by the spouse's net contribution
-        const targetOwnerCash = Math.max(0, requiredOwnerAfterTaxCash - spouseNetContrib);
+        // Owner must cover remaining family cash need after spouse contribution and spouse NG
+        const targetOwnerCash = Math.max(0, requiredAnnualCash - spouseBaseNgRefund - spouseNetContrib);
 
-        // 3. Binary search for minimum owner salary to hit targetOwnerCash
+        // Binary search for minimum owner salary that delivers targetOwnerCash
         let lo = 0;
         let hi = Math.max(netBusinessProfit, 1_000_000);
         for (let i = 0; i < 80; i++) {
           const mid = (lo + hi) / 2;
-          const ownerGross = mid + basePersonalTaxableIncome;
-          const ownerTaxOnSalary = calcTotalPersonalTax(ownerGross) - calcTotalPersonalTax(basePersonalTaxableIncome);
-          const ownerAfterTax = mid - ownerTaxOnSalary;
-          if (ownerAfterTax < targetOwnerCash) lo = mid; else hi = mid;
+          if (ownerCashFromSalary(mid) < targetOwnerCash) lo = mid; else hi = mid;
         }
         const minOwnerSal = (lo + hi) / 2;
 
-        // 4. Company tax
+        // Company tax with new salary structure (salary is deductible pre-tax)
         const newSuperContrib = (minOwnerSal + spouseSal) * SUPER_RATE;
         const newCompanyTaxableProfit = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal - newSuperContrib);
         const newCompanyTax = newCompanyTaxableProfit * COMPANY_TAX_RATE;
 
-        // 5. Total Family Tax
+        // Owner tax on their reduced salary
         const ownerGrossFinal = minOwnerSal + basePersonalTaxableIncome;
         const ownerTax = calcTotalPersonalTax(Math.max(0, ownerGrossFinal - splitLossOwner));
 
         return {
           totalFamilyTax: newCompanyTax + ownerTax + spouseTotalTax,
           minOwnerSal,
-          newCompanyTax,
-          ownerTax,
-          spouseTotalTax,
         };
       };
 
-      // Search over spouse salary amounts from 0 to netBusinessProfit
-      // in 200 steps, then refine
+      // Search over spouse salary from 0 to 80% of netBusinessProfit in 200 steps
+      // (wide range — optimal is often $40-60k even when profit is $215k)
       const baseFamilyTax = evaluateSpouseSalary(0).totalFamilyTax;
       let bestSpouseSal = 0;
       let bestFamilyTax = baseFamilyTax;
       const steps = 200;
-      const maxSpouseSal = Math.max(0, netBusinessProfit - recommendedOwnerSalary);
+      const maxSpouseSal = netBusinessProfit * 0.8;
 
       for (let i = 1; i <= steps; i++) {
         const spouseSal = (maxSpouseSal * i) / steps;
