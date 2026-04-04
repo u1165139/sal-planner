@@ -5,7 +5,6 @@ export function InputTabs() {
   const { inputs, set, activeTab, setActiveTab, validationErrors } = useTax();
 
   const getError = (field: string) => {
-    // Corrected: Zod errors are in the '.issues' property, not '.errors'
     return validationErrors?.issues.find(e => e.path[0] === field)?.message;
   };
 
@@ -80,12 +79,12 @@ export function InputTabs() {
             error={getError('monthlyRepayments')}
           />
           <InputField
-            label="Monthly Out Of Pocket for Additional Purchase"
-            sublabel="Negatively geared — tax refund on loss applied to cash flow"
-            value={inputs.monthlyAdditionalPurchase}
-            onChange={set('monthlyAdditionalPurchase')}
+            label="Monthly Deductible Investment Loss"
+            sublabel="e.g., Interest or depreciation. This generates a personal tax refund."
+            value={inputs.monthlyDeductibleInvestmentLoss}
+            onChange={set('monthlyDeductibleInvestmentLoss')}
             monthly
-            error={getError('monthlyAdditionalPurchase')}
+            error={getError('monthlyDeductibleInvestmentLoss')}
           />
           <InputField
             label="Annual Interest Income"

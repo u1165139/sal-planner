@@ -40,7 +40,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     deductibleExpenses,
     monthlyLiving,
     monthlyRepayments,
-    monthlyAdditionalPurchase,
+    monthlyDeductibleInvestmentLoss,
     interestIncome,
     propertyIncome,
     maximiseSuper,
@@ -49,11 +49,12 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   // ── Base calculations ──────────────────────────────────────────────────────
   const businessRevenue = businessIncomeGST / 1.1;
   const netBusinessProfit = businessRevenue - deductibleExpenses;
-  const requiredAnnualCash = (monthlyLiving + monthlyRepayments + monthlyAdditionalPurchase) * 12;
+  // Note: The investment loss is a paper loss, not a cash expense, so it's not in requiredAnnualCash.
+  const requiredAnnualCash = (monthlyLiving + monthlyRepayments) * 12;
   const basePersonalTaxableIncome = interestIncome + propertyIncome;
 
-  // ── Negative gearing on additional purchase ────────────────────────────────
-  const annualAdditionalPurchaseLoss = monthlyAdditionalPurchase * 12;
+  // ── Negative gearing on investment loss ────────────────────────────────
+  const annualDeductibleInvestmentLoss = monthlyDeductibleInvestmentLoss * 12;
 
   // ── Binary search for recommended salary ──────────────────────────────────
   const availableNonSalaryCash = interestIncome;
@@ -62,7 +63,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const computeCash = (salary: number) => {
     const grossIncome = salary + basePersonalTaxableIncome;
     const taxWithout = calcTotalPersonalTax(grossIncome);
-    const taxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualAdditionalPurchaseLoss));
+    const taxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
     const ngRefund = taxWithout - taxWith;
     const taxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
     const personalTaxOnSalary = taxWithout - taxOnBaseOnly;
@@ -100,12 +101,12 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   // ── Final tax calculations ─────────────────────────────────────────────────
   const grossIncome = recommendedSalary + basePersonalTaxableIncome;
   const personalTaxWithout = calcTotalPersonalTax(grossIncome);
-  const personalTaxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualAdditionalPurchaseLoss));
+  const personalTaxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
   const negativeGearingRefund = personalTaxWithout - personalTaxWith;
   const personalTaxTotal = personalTaxWith;
   const personalTaxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
   const personalTaxOnSalary = personalTaxWithout - personalTaxOnBaseOnly;
-  const totalPersonalTaxableIncome = Math.max(0, grossIncome - annualAdditionalPurchaseLoss);
+  const totalPersonalTaxableIncome = Math.max(0, grossIncome - annualDeductibleInvestmentLoss);
   const companyTaxableProfit = Math.max(0, netBusinessProfit - recommendedSalary - superContribution);
   const companyTax = companyTaxableProfit * COMPANY_TAX_RATE;
   const companyAfterTaxProfit = companyTaxableProfit - companyTax;
@@ -115,9 +116,6 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const cashSurplusDeficit = totalCashAvailable - requiredAnnualCash;
   const totalTax = companyTax + personalTaxTotal;
 
-  // ── Definitive Safeguard Return Block ──────────────────────────────────────
-  // This block ensures no NaN, Infinity, or other invalid numbers can ever be
-  // returned to the UI, regardless of the input values.
   return {
     businessRevenue: ensureNumber(businessRevenue),
     netBusinessProfit: ensureNumber(netBusinessProfit),
@@ -125,7 +123,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     availableNonSalaryCash: ensureNumber(availableNonSalaryCash),
     cashShortfall: ensureNumber(cashShortfall),
     basePersonalTaxableIncome: ensureNumber(basePersonalTaxableIncome),
-    annualAdditionalPurchaseLoss: ensureNumber(annualAdditionalPurchaseLoss),
+    annualAdditionalPurchaseLoss: ensureNumber(annualDeductibleInvestmentLoss),
     negativeGearingRefund: ensureNumber(negativeGearingRefund),
     recommendedSalary: ensureNumber(recommendedSalary),
     superContribution: ensureNumber(superContribution),

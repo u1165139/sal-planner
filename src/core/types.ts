@@ -4,7 +4,7 @@ export interface CalcInputs {
   deductibleExpenses: number;
   monthlyLiving: number;
   monthlyRepayments: number;
-  monthlyAdditionalPurchase: number;
+  monthlyDeductibleInvestmentLoss: number;
   interestIncome: number;
   propertyIncome: number;
   maximiseSuper: boolean;

@@ -10,7 +10,7 @@ const DEFAULT_INPUTS: CalcInputs = {
   deductibleExpenses: 30000,
   monthlyLiving: 5000,
   monthlyRepayments: 2500,
-  monthlyAdditionalPurchase: 2500,
+  monthlyDeductibleInvestmentLoss: 2500, // Corrected property name
   interestIncome: 0,
   propertyIncome: 35000,
   maximiseSuper: false,
@@ -36,8 +36,6 @@ export function useSalaryOptimization() {
 
   const set = useCallback(
     (key: keyof CalcInputs) => (val: number | boolean) => {
-      // This is a critical safeguard. We ensure that no NaN values can ever be
-      // set in our state, even if a component (like InputField) has a bug.
       const sanitizedValue = typeof val === 'number' && isNaN(val) ? 0 : val;
       setInputs((prev) => ({ ...prev, [key]: sanitizedValue }));
     },
