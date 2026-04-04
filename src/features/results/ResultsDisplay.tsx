@@ -31,7 +31,7 @@ export function ResultsDisplay() {
       <div className="footer">
         <p>For informational purposes only — not financial or tax advice.</p>
         <p>Consult a registered tax agent for advice specific to your circumstances.</p>
-        <p style={{ marginTop: '0.3rem', opacity: 0.4 }}>2025–26 · SBBRE 25% · SGC 11.5% · Super cap $30,000</p>
+        <p style={{ marginTop: '0.3rem', opacity: 0.4 }}>2025–26 · SBBRE 25% · SGC 12% · Super cap $30,000</p>
       </div>
     </>
   );

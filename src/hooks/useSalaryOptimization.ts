@@ -1,6 +1,6 @@
-﻿import { useState, useMemo, useCallback } from 'react';
+﻿import { useState, useMemo, useCallback, useRef } from 'react';
 import { calculateTaxStrategy } from '../core/tax-engine';
-import type { CalcInputs } from '../core/types';
+import type { CalcInputs, CalcResults } from '../core/types';
 import { CalcInputsSchema } from '../core/schema';
 import { useDebounce } from 'use-debounce';
 
@@ -24,14 +24,18 @@ export function useSalaryOptimization() {
   const [debouncedInputs] = useDebounce(inputs, 250);
   const [wizardStep, setWizardStep] = useState(1);
 
+  const lastValidResults = useRef<CalcResults | null>(null);
+
   const { results, validationErrors } = useMemo(() => {
     const parsedInputs = CalcInputsSchema.safeParse(debouncedInputs);
 
     if (!parsedInputs.success) {
-      return { results: null, validationErrors: parsedInputs.error };
+      return { results: lastValidResults.current, validationErrors: parsedInputs.error };
     }
 
-    return { results: calculateTaxStrategy(parsedInputs.data), validationErrors: null };
+    const computed = calculateTaxStrategy(parsedInputs.data);
+    lastValidResults.current = computed;
+    return { results: computed, validationErrors: null };
   }, [debouncedInputs]);
 
   const set = useCallback(

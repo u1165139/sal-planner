@@ -37,7 +37,7 @@ export function Hero() {
 
       {summary.maximiseSuper && summary.superContribution > 0 && (
         <div className="super-note">
-          +&nbsp;<strong>{fmt(summary.superContribution)}</strong> employer super (SGC 11.5%) — deductible to company, not cash-in-hand
+          +&nbsp;<strong>{fmt(summary.superContribution)}</strong> employer super (SGC 12%) — deductible to company, not cash-in-hand
         </div>
       )}
       <div className="hero-sub">

@@ -7,7 +7,6 @@ export function WizardInput() {
 
   const [hasExistingProperty, setHasExistingProperty] = useState(true);
   const [hasNewProperty, setHasNewProperty] = useState(true);
-  const [existingJoint, setExistingJoint] = useState(false);
   const [newJoint, setNewJoint] = useState(false);
   const [interestOn, setInterestOn] = useState(inputs.interestIncome > 0);
 
@@ -73,24 +72,30 @@ export function WizardInput() {
 
       {/* ── Business ── */}
       <div className="form-section">
-        <div className="section-label">Your business</div>
-        <div className="step-hint">Use the total your clients pay you — including GST. We'll strip the GST out automatically.</div>
+        <div className="section-label">
+          <div className="section-label-title">Your business</div>
+          <div className="section-label-sub">Revenue and expenses before your pay</div>
+        </div>
         {renderInput('Annual revenue (inc. GST)', 'The total on your invoices for the year', 'businessIncomeGST', '/ yr')}
         {renderInput('Business expenses', "What you spend to run the business — not your pay or super", 'deductibleExpenses', '/ yr')}
       </div>
 
       {/* ── Lifestyle ── */}
       <div className="form-section">
-        <div className="section-label">Lifestyle costs</div>
-        <div className="step-hint">This is what the calculator will make sure your salary covers after tax.</div>
+        <div className="section-label">
+          <div className="section-label-title">Lifestyle costs</div>
+          <div className="section-label-sub">What your salary needs to cover each month</div>
+        </div>
         {renderInput('Monthly living expenses', 'Rent or mortgage interest, food, utilities, transport, subscriptions', 'monthlyLiving', '/ mo')}
         {renderInput('Monthly loan repayments', 'Principal repayments on your home loan — leave as 0 if none', 'monthlyRepayments', '/ mo')}
       </div>
 
       {/* ── Existing properties ── */}
       <div className="form-section">
-        <div className="section-label">Existing investment properties</div>
-        <div className="step-hint">Income from properties you currently own — this affects your tax position today.</div>
+        <div className="section-label">
+          <div className="section-label-title">Existing investment properties</div>
+          <div className="section-label-sub">Income from properties you currently own</div>
+        </div>
         <div className="yn-row">
           <button
             className={`yn-btn${hasExistingProperty ? ' sel' : ''}`}
@@ -98,7 +103,7 @@ export function WizardInput() {
           >Yes</button>
           <button
             className={`yn-btn${!hasExistingProperty ? ' sel' : ''}`}
-            onClick={() => { setHasExistingProperty(false); set('propertyIncome')(0); setExistingJoint(false); set('jointOwnership')(newJoint); }}
+            onClick={() => { setHasExistingProperty(false); set('propertyIncome')(0); set('jointOwnership')(newJoint); }}
           >No</button>
         </div>
         {hasExistingProperty && (
@@ -107,29 +112,16 @@ export function WizardInput() {
             <div className="info-box">
               This rental income is taxable and increases your personal tax bill — but since the cash goes straight to repayments, it's not counted as money you can spend.
             </div>
-            {renderToggleCard(
-              'Any properties owned jointly with your spouse?',
-              'Splits the rental income and tax deductions 50/50',
-              existingJoint,
-              () => {
-                const next = !existingJoint;
-                setExistingJoint(next);
-                const turningOn = next || newJoint;
-                set('jointOwnership')(turningOn);
-                if (turningOn && (inputs.spouseOtherIncome === 0 || inputs.spouseOtherIncome === undefined)) {
-                  set('spouseOtherIncome')(100000);
-                }
-              },
-              renderJointBody('Both the rental income and any deductible losses will be split equally between you and your spouse on your respective tax returns.')
-            )}
           </>
         )}
       </div>
 
       {/* ── New property scenario ── */}
       <div className="form-section">
-        <div className="section-label">New property scenario</div>
-        <div className="step-hint">Model the tax and cash flow impact of a potential new purchase — skip this if it doesn't apply.</div>
+        <div className="section-label">
+          <div className="section-label-title">New property scenario</div>
+          <div className="section-label-sub">Model the impact of a potential new purchase</div>
+        </div>
         <div className="yn-row">
           <button
             className={`yn-btn${hasNewProperty ? ' sel' : ''}`}
@@ -137,7 +129,7 @@ export function WizardInput() {
           >Yes — model it</button>
           <button
             className={`yn-btn${!hasNewProperty ? ' sel' : ''}`}
-            onClick={() => { setHasNewProperty(false); set('monthlyDeductibleInvestmentLoss')(0); setNewJoint(false); set('jointOwnership')(existingJoint); }}
+            onClick={() => { setHasNewProperty(false); set('monthlyDeductibleInvestmentLoss')(0); setNewJoint(false); set('jointOwnership')(false); }}
           >No, skip</button>
         </div>
         {hasNewProperty && (
@@ -153,7 +145,7 @@ export function WizardInput() {
               () => {
                 const next = !newJoint;
                 setNewJoint(next);
-                const turningOn = existingJoint || next;
+                const turningOn = next;
                 set('jointOwnership')(turningOn);
                 if (turningOn && (inputs.spouseOtherIncome === 0 || inputs.spouseOtherIncome === undefined)) {
                   set('spouseOtherIncome')(100000);
@@ -167,8 +159,10 @@ export function WizardInput() {
 
       {/* ── Other income & strategy ── */}
       <div className="form-section">
-        <div className="section-label">Other income &amp; strategy</div>
-        <div className="step-hint">All of these are optional — skip anything that doesn't apply to you.</div>
+        <div className="section-label">
+          <div className="section-label-title">Other income &amp; strategy</div>
+          <div className="section-label-sub">Optional — skip anything that doesn't apply</div>
+        </div>
 
         {renderToggleCard(
           'I earn interest on savings',
@@ -189,7 +183,7 @@ export function WizardInput() {
           inputs.maximiseSuper,
           () => set('maximiseSuper')(!inputs.maximiseSuper),
           <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, display: 'block' }}>
-            Your salary will be set so the company can contribute the full $30,000 concessional limit. Note: the mandatory 11.5% SGC always applies regardless of this setting.
+            Your salary will be set so the company can contribute the full $30,000 concessional limit. Note: the mandatory 12% SGC always applies regardless of this setting.
           </span>
         )}
 

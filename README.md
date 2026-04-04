@@ -7,7 +7,7 @@ Australian small business owner tax optimisation tool for the 2025-26 financial 
 - Calculates the mathematically optimal owner salary to minimise combined company + personal tax
 - Scenario A: Tax-optimised salary (where personal marginal rate crosses company rate)
 - Scenario B: Living expense-driven salary (minimum gross to cover after-tax cash needs)
-- Optional super maximisation (SGC 11.5%, capped at $30,000 concessional cap)
+- Optional super maximisation (SGC 12%, capped at $30,000 concessional cap)
 - Full tax breakdown: company tax, personal income tax + Medicare levy
 - Cash flow proof showing after-tax salary covers living expenses
 
@@ -76,7 +76,7 @@ src/
 |------|-------|
 | Company Tax Rate (SBBRE) | 25% |
 | Medicare Levy | 2% (on income > $18,200) |
-| Super SGC Rate | 11.5% |
+| Super SGC Rate | 12% |
 | Concessional Cap | $30,000 |
 
 ### Personal Income Tax Brackets

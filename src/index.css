@@ -496,12 +496,22 @@ body {
   padding-bottom: 0;
 }
 .section-label {
-  font-size: 0.62rem;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+  margin-bottom: 1rem;
+  margin-top: 0.25rem;
+}
+.section-label-title {
+  font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.3rem;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.section-label-sub {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  line-height: 1.4;
 }
 
 .wizard-progress {
