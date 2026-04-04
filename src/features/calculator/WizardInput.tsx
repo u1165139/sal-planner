@@ -185,8 +185,8 @@ export function WizardInput() {
             </div>
 
             {renderToggleCard(
-              'Optimise family tax',
-              'Route additional company profit to your spouse if their marginal tax rate is lower than yours — minimising total family tax.',
+              'Minimise bracket tax',
+              'Pay your spouse an additional salary from company profit to move income out of your higher tax bracket — only if it reduces total family tax.',
               inputs.optimiseFamilyTax,
               () => set('optimiseFamilyTax')(!inputs.optimiseFamilyTax)
             )}

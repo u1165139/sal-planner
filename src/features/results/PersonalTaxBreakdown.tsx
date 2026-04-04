@@ -159,16 +159,49 @@ export function PersonalTaxBreakdown() {
           marginTop: '0.75rem',
           padding: '0.65rem 0.85rem',
           borderRadius: '6px',
-          border: `1px solid ${results.familyOptimisationActive ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`,
-          background: results.familyOptimisationActive ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.04)',
+          border: results.familyOptimisationActive
+            ? '1px solid rgba(74,222,128,0.3)'
+            : '1px solid rgba(255,255,255,0.1)',
+          background: results.familyOptimisationActive
+            ? 'rgba(74,222,128,0.07)'
+            : 'rgba(255,255,255,0.04)',
         }}>
           {results.familyOptimisationActive && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-              <span style={{ fontSize: '0.72rem', color: 'var(--panel-text-mid)' }}>Potential family tax saving</span>
-              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#4ade80' }}>+{fmt(results.familyTaxSaving)}</span>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.45rem',
+            }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--panel-text-mid)' }}>
+                Potential family tax saving
+              </span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#4ade80' }}>
+                +{fmt(results.familyTaxSaving)}
+              </span>
             </div>
           )}
-          <p style={{ fontSize: '0.68rem', color: 'var(--panel-text-dim)', lineHeight: 1.5, margin: 0 }}>
+          {results.familyOptimisationActive && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.45rem',
+            }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--panel-text-mid)' }}>
+                Suggested extra spouse salary
+              </span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--panel-text)' }}>
+                {fmt(results.extraSpouseSalary)}
+              </span>
+            </div>
+          )}
+          <p style={{
+            fontSize: '0.67rem',
+            color: 'var(--panel-text-dim)',
+            lineHeight: 1.55,
+            margin: 0,
+          }}>
             {results.familyOptimisationMessage}
           </p>
         </div>
