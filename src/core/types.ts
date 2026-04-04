@@ -60,4 +60,6 @@ export interface CalcResults {
   extraSpouseSalary: number;
   familyOptimisationActive: boolean;
   familyOptimisationMessage: string;
+  ownerVoluntaryContribution: number;
+  spouseVoluntaryContribution: number;
 }

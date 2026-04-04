@@ -39,6 +39,62 @@ export function calcTotalPersonalTax(income: number): number {
   return calcPersonalIncomeTax(income) + calcMedicare(income);
 }
 
+// ─── SUPER CONTRIBUTION HELPER ────────────────────────────────────────────
+
+interface SuperResult {
+  superContribution: number;
+  ownerVoluntaryContribution: number;
+  spouseVoluntaryContribution: number;
+}
+
+function calculateSuperContribution(
+  ownerSalary: number,
+  spouseSalary: number,
+  maximiseSuper: boolean,
+  availableProfit: number,
+): SuperResult {
+  // Mandatory SGC always applies on any salary drawn
+  const ownerMandatory = ownerSalary * SUPER_RATE;
+  const spouseMandatory = spouseSalary * SUPER_RATE;
+  const totalMandatory = ownerMandatory + spouseMandatory;
+
+  if (!maximiseSuper) {
+    return {
+      superContribution: Math.min(totalMandatory, availableProfit),
+      ownerVoluntaryContribution: 0,
+      spouseVoluntaryContribution: 0,
+    };
+  }
+
+  // Each person with a salary gets their own $30k concessional cap
+  const ownerCap = ownerSalary > 0 ? SUPER_CAP : 0;
+  const spouseCap = spouseSalary > 0 ? SUPER_CAP : 0;
+
+  // Voluntary top-up = gap between mandatory SGC and the cap, per person
+  const ownerVoluntary = Math.max(0, ownerCap - ownerMandatory);
+  const spouseVoluntary = Math.max(0, spouseCap - spouseMandatory);
+  const totalTarget = totalMandatory + ownerVoluntary + spouseVoluntary;
+
+  // Can't contribute more than available profit allows
+  const totalContribution = Math.min(totalTarget, availableProfit);
+
+  // Apportion voluntary shortfall proportionally if profit is constrained
+  const totalVoluntaryTarget = ownerVoluntary + spouseVoluntary;
+  let ownerVol = ownerVoluntary;
+  let spouseVol = spouseVoluntary;
+  if (totalContribution < totalTarget && totalVoluntaryTarget > 0) {
+    const voluntaryAvailable = Math.max(0, totalContribution - totalMandatory);
+    ownerVol = totalVoluntaryTarget > 0 ? (ownerVoluntary / totalVoluntaryTarget) * voluntaryAvailable : 0;
+    spouseVol = totalVoluntaryTarget > 0 ? (spouseVoluntary / totalVoluntaryTarget) * voluntaryAvailable : 0;
+  }
+
+  return {
+    superContribution: Math.min(totalContribution, availableProfit),
+    ownerVoluntaryContribution: ownerVol,
+    spouseVoluntaryContribution: spouseVol,
+  };
+}
+
 // ─── CORE CALCULATION ENGINE ──────────────────────────────────────────────────
 
 export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
@@ -124,59 +180,14 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   recommendedSpouseSalary = splitResult.spouseSal;
 
   // ── Super adjustment ───────────────────────────────────────────────────────
-  let superContribution = 0;
-
-  if (maximiseSuper) {
-    // Step 1: Calculate mandatory SGC on the drawn salary
-    const mandatorySGC = (recommendedOwnerSalary + recommendedSpouseSalary) * SUPER_RATE;
-
-    // Step 2: Calculate how much extra the company can contribute to reach the cap
-    // Each person with a salary gets their own $30k cap
-    let totalCap = 0;
-    if (recommendedOwnerSalary > 0) totalCap += SUPER_CAP;
-    if (recommendedSpouseSalary > 0) totalCap += SUPER_CAP;
-    if (totalCap === 0) totalCap = SUPER_CAP;
-
-    // Step 3: The company makes an additional voluntary concessional contribution
-    // on top of SGC to reach the cap — this is deductible to the company
-    const targetContribution = Math.min(mandatorySGC + (totalCap - mandatorySGC), totalCap);
-    const additionalContribution = Math.max(0, targetContribution - mandatorySGC);
-
-    // Step 4: Cap total salary + super within available profit
-    // (can't pay more super than there is profit to support it)
-    const maxPossibleSuper = Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary);
-    superContribution = Math.min(targetContribution, maxPossibleSuper);
-
-    // Step 5: If maximising super reduces available cash (because super isn't spendable),
-    // we may need to slightly increase salary to compensate — re-run binary search
-    // only if the additional contribution meaningfully reduces spendable cash
-    if (additionalContribution > 0) {
-      const { afterTax: afterTaxCheck, ngRefund: ngCheck } = computeCash(recommendedOwnerSalary + recommendedSpouseSalary);
-      const cashCheck = afterTaxCheck + availableNonSalaryCash + ngCheck;
-      if (cashCheck < requiredAnnualCash) {
-        // Need more salary to cover cash needs after super is maximised
-        let lo = recommendedOwnerSalary + recommendedSpouseSalary;
-        let hi = Math.max(netBusinessProfit, 1_000_000);
-        for (let i = 0; i < 80; i++) {
-          const mid = (lo + hi) / 2;
-          const salaryForSuper = Math.min(mid / (1 + SUPER_RATE), mid);
-          const { afterTax, ngRefund } = computeCash(salaryForSuper);
-          const total = afterTax + availableNonSalaryCash + ngRefund;
-          if (total < requiredAnnualCash) lo = mid; else hi = mid;
-        }
-        const newTotalSalary = Math.min((lo + hi) / 2, Math.max(0, netBusinessProfit));
-        const reSplit = computeCash(newTotalSalary);
-        recommendedOwnerSalary = reSplit.ownerSal;
-        recommendedSpouseSalary = reSplit.spouseSal;
-        const newMandatorySGC = (recommendedOwnerSalary + recommendedSpouseSalary) * SUPER_RATE;
-        const newMaxSuper = Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary);
-        superContribution = Math.min(totalCap, newMaxSuper, newMandatorySGC + additionalContribution);
-      }
-    }
-  } else {
-    // Mandatory SGC always applies on any salary drawn
-    superContribution = (recommendedOwnerSalary + recommendedSpouseSalary) * SUPER_RATE;
-  }
+  const availableProfitForSuper = Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary);
+  const superResult = calculateSuperContribution(
+    recommendedOwnerSalary,
+    recommendedSpouseSalary,
+    maximiseSuper,
+    availableProfitForSuper,
+  );
+  let superContribution = superResult.superContribution;
 
   // ── Final tax calculations ─────────────────────────────────────────────────
   let companyTaxableProfit = Math.max(0, netBusinessProfit - totalRecommendedSalary - superContribution);
@@ -290,7 +301,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
         const minOwnerSal = (lo + hi) / 2;
 
         // Company tax with new salary structure (salary is deductible pre-tax)
-        const newSuperContrib = (minOwnerSal + spouseSal) * SUPER_RATE;
+        const newAvailableForSuper = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal);
+        const newSuperContrib = calculateSuperContribution(minOwnerSal, spouseSal, maximiseSuper, newAvailableForSuper).superContribution;
         const newCompanyTaxableProfit = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal - newSuperContrib);
         const newCompanyTax = newCompanyTaxableProfit * COMPANY_TAX_RATE;
 
@@ -345,10 +357,16 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
           ? `$${Math.round(extraSpouseSalary / 1000)}k`
           : `$${Math.round(extraSpouseSalary)}`;
         const saving = Math.round(familyTaxSaving).toLocaleString();
-        familyOptimisationMessage = `Paying your spouse ${extraK} from the company (instead of routing it to you) saves $${saving} in total family tax — shifting income from your ${ownerRatePct}% bracket to your spouse's ${spouseRatePct}% bracket. Your take-home pay is unchanged.`;
+        const spouseGetsSuper = maximiseSuper && extraSpouseSalary > 0;
+        const superNote = spouseGetsSuper
+          ? ` Your spouse also gains their own $30k concessional super cap, compounding the saving.`
+          : '';
+        familyOptimisationMessage = `Paying your spouse ${extraK} from the company (instead of routing it to you) saves $${saving} in total family tax — shifting income from your ${ownerRatePct}% bracket to your spouse's ${spouseRatePct}% bracket. Your take-home pay is unchanged.${superNote}`;
       } else {
         familyOptimisationMessage = `No meaningful saving found. The gap between your marginal rates (${Math.round(ownerMarginal * 100)}% vs ${Math.round(spouseMarginal * 100)}%) is not large enough to overcome the difference in company tax treatment.`;
       }
+
+      let optimisedSuperResult = superResult;
 
       if (familyOptimisationActive) {
         const optimised = evaluateSpouseSalary(bestSpouseSal);
@@ -358,15 +376,14 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
         recommendedSpouseSalary = extraSpouseSalary;
 
         // Recalculate super on new salary split
-        if (maximiseSuper) {
-          let totalCap = 0;
-          if (recommendedOwnerSalary > 0) totalCap += SUPER_CAP;
-          if (recommendedSpouseSalary > 0) totalCap += SUPER_CAP;
-          if (totalCap === 0) totalCap = SUPER_CAP;
-          superContribution = Math.min((recommendedOwnerSalary + recommendedSpouseSalary) * SUPER_RATE, totalCap);
-        } else {
-          superContribution = (recommendedOwnerSalary + recommendedSpouseSalary) * SUPER_RATE;
-        }
+        const optimisedAvailableProfit = Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary);
+        optimisedSuperResult = calculateSuperContribution(
+          recommendedOwnerSalary,
+          recommendedSpouseSalary,
+          maximiseSuper,
+          optimisedAvailableProfit,
+        );
+        superContribution = optimisedSuperResult.superContribution;
 
         // Recalculate company tax
         const optCompanyTaxableProfit = Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary - superContribution);
@@ -415,6 +432,10 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     }
   }
 
+  const finalSuperResult = familyOptimisationActive && inputs.optimiseFamilyTax && inputs.jointOwnership
+    ? calculateSuperContribution(recommendedOwnerSalary, recommendedSpouseSalary, maximiseSuper, Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary))
+    : superResult;
+
   return {
     businessRevenue: ensureNumber(businessRevenue),
     netBusinessProfit: ensureNumber(netBusinessProfit),
@@ -440,7 +461,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     spouseNgRefund: ensureNumber(spouseNgRefund),
     afterTaxSpouseSalary: ensureNumber(afterTaxSpouseSalary),
     totalFamilyTax: ensureNumber(totalFamilyTax),
-    effectivePersonalRate: ensureNumber((personalTaxTotal / grossIncome) * 100),
+    effectivePersonalRate: ensureNumber((personalTaxTotal / (recommendedOwnerSalary + basePersonalTaxableIncome + grossedUpDividend)) * 100),
     effectiveCompanyRate: ensureNumber((companyTax / netBusinessProfit) * 100),
     afterTaxSalary: ensureNumber(afterTaxSalary),
     totalCashAvailable: ensureNumber(totalCashAvailable),
@@ -454,5 +475,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     familyTaxSaving: ensureNumber(familyTaxSaving),
     familyOptimisationActive: familyOptimisationActive,
     familyOptimisationMessage: familyOptimisationMessage,
+    ownerVoluntaryContribution: ensureNumber(finalSuperResult.ownerVoluntaryContribution),
+    spouseVoluntaryContribution: ensureNumber(finalSuperResult.spouseVoluntaryContribution),
   };
 }

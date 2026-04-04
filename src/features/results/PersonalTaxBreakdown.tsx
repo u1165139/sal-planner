@@ -1,6 +1,7 @@
 ﻿import { useTax } from '../../context/TaxContext';
 import { fmt, fmtPct } from '../../utils/formatters';
 import { calcTotalPersonalTax } from '../../core/tax-engine';
+import { SUPER_RATE } from '../../core/constants';
 
 function TaxRow({ label, value, type }: { label: string; value: string; type?: 'neg' | 'pos' | 'gold' }) {
   return (
@@ -38,11 +39,14 @@ interface PersonColumnProps {
   effRate: number;
   afterTaxTotal: number;
   isSplit?: boolean;
+  mandatorySuper?: number;
+  voluntarySuper?: number;
 }
 
 function PersonColumn({
   title, salary, otherIncome, interestIncome, propertyIncome, grossedUpDiv, showDiv,
-  investmentLoss, grossIncome, netTaxable, ngRefund, frankingCredit, tax, effRate, afterTaxTotal, isSplit
+  investmentLoss, grossIncome, netTaxable, ngRefund, frankingCredit, tax, effRate, afterTaxTotal, isSplit,
+  mandatorySuper, voluntarySuper
 }: PersonColumnProps) {
   return (
     <div style={{ flex: 1 }}>
@@ -68,6 +72,18 @@ function PersonColumn({
 
       <div style={{ background: 'rgba(167,139,250,0.1)', borderRadius: '6px', border: '1px solid rgba(167,139,250,0.2)', padding: '0.5rem 0.6rem', marginTop: '0.65rem' }}>
         <TaxRow label="Effective rate" value={fmtPct(effRate)} type="gold" />
+        {(mandatorySuper !== undefined && mandatorySuper > 0) && (
+          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
+            <span className="tax-row-label">Super (SGC)</span>
+            <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(mandatorySuper)}</span>
+          </div>
+        )}
+        {(voluntarySuper !== undefined && voluntarySuper > 0) && (
+          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
+            <span className="tax-row-label">Super (voluntary)</span>
+            <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(voluntarySuper)}</span>
+          </div>
+        )}
         <div style={{ marginTop: '0.25rem' }}>
           <TaxRow label="After-tax income" value={fmt(afterTaxTotal)} type="pos" />
         </div>
@@ -125,6 +141,8 @@ export function PersonalTaxBreakdown() {
           tax={ownerTax}
           effRate={ownerEffRate}
           afterTaxTotal={ownerAfterTaxTotal}
+          mandatorySuper={results.recommendedSalary * SUPER_RATE}
+          voluntarySuper={results.ownerVoluntaryContribution}
         />
 
         {hasSpouse && (
@@ -142,6 +160,8 @@ export function PersonalTaxBreakdown() {
               tax={spouseTotalTax}
               effRate={spouseEffRate}
               afterTaxTotal={spouseAfterTaxTotal}
+              mandatorySuper={results.spouseSalary * SUPER_RATE}
+              voluntarySuper={results.spouseVoluntaryContribution}
             />
           </>
         )}

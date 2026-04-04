@@ -53,7 +53,10 @@ export const selectCompanyTaxBreakdown = createSelector(
       businessRevenue: results.businessRevenue,
       netBusinessProfit: results.netBusinessProfit,
       recommendedSalary: results.recommendedSalary,
+      spouseSalary: results.spouseSalary,
       superContribution: results.superContribution,
+      ownerVoluntaryContribution: results.ownerVoluntaryContribution,
+      spouseVoluntaryContribution: results.spouseVoluntaryContribution,
       companyTaxableProfit: results.companyTaxableProfit,
       companyTax: results.companyTax,
       companyAfterTaxProfit: results.companyAfterTaxProfit,
@@ -104,6 +107,7 @@ export const selectCashFlowSummary = createSelector(
       drawDividend: inputs.drawDividend,
       netDividend: results.netDividend,
       dividendTopUpTax: results.dividendTopUpTax,
+      jointOwnership: inputs.jointOwnership,
     };
   }
 );

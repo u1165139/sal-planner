@@ -15,10 +15,38 @@ export function CompanyTaxBreakdown() {
       <div className="tax-breakdown">
         <div className="tax-row"><span className="tax-row-label">Revenue (Excl. GST)</span><span className="tax-row-value">{fmt(breakdown.businessRevenue)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Net Profit (Before Salary)</span><span className="tax-row-value">{fmt(breakdown.netBusinessProfit)}</span></div>
-        <div className="tax-row"><span className="tax-row-label">Less: Owner Salary</span><span className="tax-row-value negative">−{fmt(breakdown.recommendedSalary)}</span></div>
-        {breakdown.maximiseSuper && breakdown.superContribution > 0 && (
-          <div className="tax-row"><span className="tax-row-label">Less: Super (SGC)</span><span className="tax-row-value negative">−{fmt(breakdown.superContribution)}</span></div>
-        )}
+      <div className="tax-row">
+        <span className="tax-row-label">Less: Owner Salary</span>
+        <span className="tax-row-value negative">−{fmt(breakdown.recommendedSalary)}</span>
+      </div>
+      {breakdown.spouseSalary > 0 && (
+        <div className="tax-row">
+          <span className="tax-row-label">Less: Spouse Salary</span>
+          <span className="tax-row-value negative">−{fmt(breakdown.spouseSalary)}</span>
+        </div>
+      )}
+      {breakdown.superContribution > 0 && (
+        <>
+          <div className="tax-row">
+            <span className="tax-row-label">
+              Less: Super {breakdown.maximiseSuper ? '(SGC + Voluntary)' : '(SGC)'}
+            </span>
+            <span className="tax-row-value negative">−{fmt(breakdown.superContribution)}</span>
+          </div>
+          {breakdown.maximiseSuper && breakdown.ownerVoluntaryContribution > 0 && (
+            <div className="tax-row tax-row-indent">
+              <span className="tax-row-label">Owner voluntary top-up</span>
+              <span className="tax-row-value negative">−{fmt(breakdown.ownerVoluntaryContribution)}</span>
+            </div>
+          )}
+          {breakdown.maximiseSuper && breakdown.spouseVoluntaryContribution > 0 && (
+            <div className="tax-row tax-row-indent">
+              <span className="tax-row-label">Spouse voluntary top-up</span>
+              <span className="tax-row-value negative">−{fmt(breakdown.spouseVoluntaryContribution)}</span>
+            </div>
+          )}
+        </>
+      )}
         <div className="tax-row"><span className="tax-row-label">Taxable Company Profit</span><span className="tax-row-value">{fmt(breakdown.companyTaxableProfit)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Company Tax @ 25%</span><span className="tax-row-value negative">−{fmt(breakdown.companyTax)}</span></div>
         <div className="tax-total"><span className="tax-total-label">After-Tax Profit</span><span className="tax-row-value gold">{fmt(breakdown.companyAfterTaxProfit)}</span></div>

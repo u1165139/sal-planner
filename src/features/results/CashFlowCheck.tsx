@@ -20,7 +20,9 @@ export function CashFlowCheck() {
             <div className="cashflow-item"><span className="cashflow-item-label">Interest Income</span><span className="cashflow-item-value">{fmt(summary.interestIncome)}</span></div>
             {summary.negativeGearingRefund > 0 && (
               <div className="cashflow-item">
-                <span className="cashflow-item-label">Investment Tax Credits (50/50 Split)</span>
+                <span className="cashflow-item-label">
+                {summary.jointOwnership ? 'Investment Tax Refund (50/50 Split)' : 'Investment Tax Refund'}
+              </span>
                 <span className="cashflow-item-value highlight">+{fmt(summary.negativeGearingRefund)}</span>
               </div>
             )}
