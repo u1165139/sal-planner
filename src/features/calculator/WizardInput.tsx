@@ -161,9 +161,6 @@ export function WizardInput() {
                 setNewJoint(next);
                 const turningOn = next;
                 set('jointOwnership')(turningOn);
-                if (turningOn && (inputs.spouseOtherIncome === 0 || inputs.spouseOtherIncome === undefined)) {
-                  set('spouseOtherIncome')(100000);
-                }
               },
               renderJointBody('Each person claims half the deductible loss on their own tax return.')
             )}
