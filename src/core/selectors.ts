@@ -72,6 +72,7 @@ export const selectPersonalTaxBreakdown = createSelector(
       basePersonalTaxableIncome: results.basePersonalTaxableIncome,
       annualDeductibleInvestmentLoss: results.annualDeductibleInvestmentLoss,
       totalPersonalTaxableIncome: results.totalPersonalTaxableIncome,
+      taxBeforeDeduction: results.personalTaxTotal + results.negativeGearingRefund,
       personalTaxTotal: results.personalTaxTotal,
       negativeGearingRefund: results.negativeGearingRefund,
       effectivePersonalRate: results.effectivePersonalRate,
