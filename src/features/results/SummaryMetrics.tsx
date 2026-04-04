@@ -12,6 +12,7 @@ export function SummaryMetrics() {
 
   return (
     <div className="grid-4 section">
+      <MetricCard label="Business Revenue" value={fmt(summary.businessRevenue)} sub="Net of GST" accent />
       <MetricCard label="Total Tax Paid" value={fmt(summary.totalTax)} sub="Company + Personal" accent />
       <MetricCard label="Company Tax" value={fmt(summary.companyTax)} sub={`${fmtPct(summary.effectiveCompanyRate)} eff. rate`} />
       <MetricCard label="Personal Tax" value={fmt(summary.personalTaxTotal)} sub={`${fmtPct(summary.effectivePersonalRate)} eff. rate`} />

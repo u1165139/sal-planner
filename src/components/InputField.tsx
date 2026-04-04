@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface InputFieldProps {
   label: string;
@@ -19,18 +19,23 @@ export default function InputField({
   monthly = false,
   error,
 }: InputFieldProps) {
+  const [localValue, setLocalValue] = useState(String(value));
+
+  useEffect(() => {
+    const parsed = parseFloat(localValue);
+    if (parsed !== value && !(isNaN(parsed) && value === 0)) {
+      setLocalValue(String(value));
+    }
+  }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
-    const numericValue = parseFloat(rawValue);
-    
-    // Always call onChange with a valid number, defaulting to 0 for empty/invalid inputs.
-    onChange(Number.isFinite(numericValue) ? numericValue : 0);
+    if (/^\d*\.?\d*$/.test(rawValue)) {
+      setLocalValue(rawValue);
+      const numericValue = parseFloat(rawValue);
+      onChange(isNaN(numericValue) ? 0 : numericValue);
+    }
   };
-
-  // The input's display value is now directly controlled by the parent's `value` prop.
-  // We show an empty string if the value is 0, for a better user experience.
-  const displayValue = Number.isFinite(value) && value === 0 ? '' : String(value);
 
   return (
     <div className="input-group">
@@ -43,8 +48,9 @@ export default function InputField({
         <input
           type="text"
           inputMode="decimal"
-          value={displayValue}
+          value={localValue}
           onChange={handleChange}
+          onBlur={() => setLocalValue(String(value))}
           onFocus={(e) => e.target.select()}
           className="input-field"
           placeholder="0"

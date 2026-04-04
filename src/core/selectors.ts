@@ -33,6 +33,7 @@ export const selectMetricsSummary = createSelector(
     if (!results) return null;
     return {
       totalTax: results.totalTax,
+      businessRevenue: results.businessRevenue,
       companyTax: results.companyTax,
       effectiveCompanyRate: results.effectiveCompanyRate,
       personalTaxTotal: results.personalTaxTotal,

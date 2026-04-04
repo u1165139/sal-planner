@@ -12,7 +12,7 @@ export function Hero() {
   return (
     <>
       {summary.isHighTaxBracket && (
-        <div style={{ padding: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
+        <div className="surplus-banner deficit" style={{ marginBottom: '1rem' }}>
           ⚠️ High Tax Alert: Salary exceeds $190k (45% bracket)
         </div>
       )}
