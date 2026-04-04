@@ -8,12 +8,13 @@ import { useDebounce } from 'use-debounce';
 const DEFAULT_INPUTS: CalcInputs = {
   businessIncomeGST: 270000,
   deductibleExpenses: 30000,
-  monthlyLiving: 5000,
+  monthlyLiving: 5500,
   monthlyRepayments: 2500,
-  monthlyDeductibleInvestmentLoss: 2500, // Corrected property name
+  monthlyDeductibleInvestmentLoss: 2600, // Corrected property name
   interestIncome: 0,
   propertyIncome: 35000,
   maximiseSuper: false,
+  drawDividend: false,
 };
 
 export function useSalaryOptimization() {

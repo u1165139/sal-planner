@@ -9,6 +9,7 @@ export const CalcInputsSchema = z.object({
   interestIncome: z.number().min(0, "Interest income must be positive"),
   propertyIncome: z.number().min(0, "Property income must be positive"),
   maximiseSuper: z.boolean(),
+  drawDividend: z.boolean(),
 });
 
 export type InputValidationErrors = z.ZodError<z.infer<typeof CalcInputsSchema>>;

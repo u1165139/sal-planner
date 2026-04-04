@@ -24,7 +24,7 @@ export function CashFlowCheck() {
                 <span className="cashflow-item-value highlight">+{fmt(summary.negativeGearingRefund)}</span>
               </div>
             )}
-            <div className="cashflow-total"><span>Total</span><span style={{ color: '#4ade80' }}>{fmt(summary.totalCashAvailable)}</span></div>
+            <div className="cashflow-total"><span>Total Net Take-Home (Annual)</span><span style={{ color: '#4ade80' }}>{fmt(summary.totalCashAvailable)}</span></div>
           </div>
           <div className="cashflow-equals">=</div>
           <div>

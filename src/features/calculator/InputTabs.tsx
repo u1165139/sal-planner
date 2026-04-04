@@ -117,6 +117,21 @@ export function InputTabs() {
           <div className={`toggle-switch ${inputs.maximiseSuper ? 'on' : ''}`} />
         </div>
       </div>
+
+      {/* Distribution Strategy */}
+      <div className="card section">
+        <div className="card-title"><span className="card-title-dot" />Distribution Strategy</div>
+        <div
+          className="toggle-row"
+          onClick={() => set('drawDividend')(!inputs.drawDividend)}
+        >
+          <div>
+            <div className="toggle-label">Draw Remaining Profit as Dividend</div>
+            <div className="toggle-sublabel">Models drawing all after-tax company profit as a franked dividend to see your total individual tax position.</div>
+          </div>
+          <div className={`toggle-switch ${inputs.drawDividend ? 'on' : ''}`} />
+        </div>
+      </div>
     </>
   );
 }

@@ -8,6 +8,7 @@ export interface CalcInputs {
   interestIncome: number;
   propertyIncome: number;
   maximiseSuper: boolean;
+  drawDividend: boolean;
 }
 
 export interface CalcResults {
@@ -41,4 +42,8 @@ export interface CalcResults {
   totalCashAvailable: number;
   cashSurplusDeficit: number;
   isHighTaxBracket: boolean;
+  netDividend: number;
+  frankingCredit: number;
+  grossedUpDividend: number;
+  dividendTopUpTax: number;
 }

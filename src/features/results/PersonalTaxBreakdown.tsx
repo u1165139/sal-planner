@@ -17,17 +17,25 @@ export function PersonalTaxBreakdown() {
         <div className="tax-row"><span className="tax-row-label">Salary</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary)}</span></div>
         <div className="tax-row"><span className="tax-row-label">+ Interest Income</span><span className="tax-row-value">{fmt(breakdown.interestIncome)}</span></div>
         <div className="tax-row"><span className="tax-row-label">+ Property Income</span><span className="tax-row-value">{fmt(breakdown.propertyIncome)}</span></div>
-        <div className="tax-row"><span className="tax-row-label">Gross Taxable Income</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary + breakdown.basePersonalTaxableIncome)}</span></div>
-        
+        {breakdown.drawDividend && (
+          <div className="tax-row"><span className="tax-row-label">+ Grossed-up Dividend</span><span className="tax-row-value">{fmt(breakdown.grossedUpDividend)}</span></div>
+        )}
+        <div className="tax-row"><span className="tax-row-label">Gross Taxable Income</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary + breakdown.basePersonalTaxableIncome + (breakdown.drawDividend ? breakdown.grossedUpDividend : 0))}</span></div>
+
         <h4 style={{ margin: '1rem 0 0.5rem', fontSize: '0.85rem', color: 'var(--panel-text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tax & Adjustments</h4>
         {breakdown.annualDeductibleInvestmentLoss > 0 && (
           <div className="tax-row"><span className="tax-row-label">Less: Deductible Investment Loss</span><span className="tax-row-value negative">−{fmt(breakdown.annualDeductibleInvestmentLoss)}</span></div>
         )}
         <div className="tax-row"><span className="tax-row-label">Net Taxable Income</span><span className="tax-row-value">{fmt(breakdown.totalPersonalTaxableIncome)}</span></div>
-        {breakdown.negativeGearingRefund > 0 ? (
+        {breakdown.negativeGearingRefund > 0 || breakdown.drawDividend ? (
           <>
             <div className="tax-row"><span className="tax-row-label">Tax Before Deductions</span><span className="tax-row-value negative">−{fmt(breakdown.taxBeforeDeduction)}</span></div>
-            <div className="tax-row"><span className="tax-row-label">Tax Saved (Negative Gearing)</span><span className="tax-row-value positive">+{fmt(breakdown.negativeGearingRefund)}</span></div>
+            {breakdown.negativeGearingRefund > 0 && (
+              <div className="tax-row"><span className="tax-row-label">Tax Saved (Negative Gearing)</span><span className="tax-row-value positive">+{fmt(breakdown.negativeGearingRefund)}</span></div>
+            )}
+            {breakdown.drawDividend && (
+              <div className="tax-row"><span className="tax-row-label">Less: Franking Credit Offset</span><span className="tax-row-value positive">+{fmt(breakdown.frankingCredit)}</span></div>
+            )}
             <div className="tax-row"><span className="tax-row-label">Final Income Tax + Medicare</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxTotal)}</span></div>
           </>
         ) : (

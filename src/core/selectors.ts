@@ -72,10 +72,13 @@ export const selectPersonalTaxBreakdown = createSelector(
       basePersonalTaxableIncome: results.basePersonalTaxableIncome,
       annualDeductibleInvestmentLoss: results.annualDeductibleInvestmentLoss,
       totalPersonalTaxableIncome: results.totalPersonalTaxableIncome,
-      taxBeforeDeduction: results.personalTaxTotal + results.negativeGearingRefund,
+      taxBeforeDeduction: results.personalTaxTotal + results.negativeGearingRefund + results.frankingCredit,
       personalTaxTotal: results.personalTaxTotal,
       negativeGearingRefund: results.negativeGearingRefund,
       effectivePersonalRate: results.effectivePersonalRate,
+      drawDividend: inputs.drawDividend,
+      grossedUpDividend: results.grossedUpDividend,
+      frankingCredit: results.frankingCredit,
     };
   }
 );
@@ -94,6 +97,20 @@ export const selectCashFlowSummary = createSelector(
       monthlyDeductibleInvestmentLoss: inputs.monthlyDeductibleInvestmentLoss,
       requiredAnnualCash: results.requiredAnnualCash,
       cashSurplusDeficit: results.cashSurplusDeficit,
+    };
+  }
+);
+
+export const selectDividendAnalysis = createSelector(
+  [selectResults, selectInputs],
+  (results, inputs) => {
+    if (!results) return null;
+    return {
+      drawDividend: inputs.drawDividend,
+      netDividend: results.netDividend,
+      frankingCredit: results.frankingCredit,
+      grossedUpDividend: results.grossedUpDividend,
+      dividendTopUpTax: results.dividendTopUpTax,
     };
   }
 );

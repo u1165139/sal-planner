@@ -105,20 +105,41 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   }
 
   // ── Final tax calculations ─────────────────────────────────────────────────
-  const grossIncome = recommendedSalary + basePersonalTaxableIncome;
-  const personalTaxWithout = calcTotalPersonalTax(grossIncome);
-  const personalTaxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
-  const negativeGearingRefund = personalTaxWithout - personalTaxWith;
-  const personalTaxTotal = personalTaxWith;
-  const personalTaxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
-  const personalTaxOnSalary = personalTaxWithout - personalTaxOnBaseOnly;
-  const totalPersonalTaxableIncome = Math.max(0, grossIncome - annualDeductibleInvestmentLoss);
   const companyTaxableProfit = Math.max(0, netBusinessProfit - recommendedSalary - superContribution);
   const companyTax = companyTaxableProfit * COMPANY_TAX_RATE;
   const companyAfterTaxProfit = companyTaxableProfit - companyTax;
+
+  let netDividend = 0;
+  let frankingCredit = 0;
+  let grossedUpDividend = 0;
+  let dividendTopUpTax = 0;
+
+  if (inputs.drawDividend) {
+    netDividend = companyAfterTaxProfit;
+    frankingCredit = netDividend * (COMPANY_TAX_RATE / (1 - COMPANY_TAX_RATE));
+    grossedUpDividend = netDividend + frankingCredit;
+  }
+
+  const grossIncome = recommendedSalary + basePersonalTaxableIncome + grossedUpDividend;
+  const personalTaxWithout = calcTotalPersonalTax(grossIncome);
+  const personalTaxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
+  
+  if (inputs.drawDividend) {
+    const baseTaxWithoutDiv = calcTotalPersonalTax(Math.max(0, recommendedSalary + basePersonalTaxableIncome - annualDeductibleInvestmentLoss));
+    dividendTopUpTax = Math.max(0, personalTaxWith - baseTaxWithoutDiv - frankingCredit);
+  }
+
+  const negativeGearingRefund = personalTaxWithout - personalTaxWith;
+  let personalTaxTotal = personalTaxWith - frankingCredit;
+  if (personalTaxTotal < 0) personalTaxTotal = 0;
+  
+  const personalTaxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
+  const personalTaxOnSalary = personalTaxWithout - personalTaxOnBaseOnly;
+  const totalPersonalTaxableIncome = Math.max(0, grossIncome - annualDeductibleInvestmentLoss);
+
   const afterTaxSalary = recommendedSalary - personalTaxOnSalary;
-  const totalCashAvailable = afterTaxSalary + availableNonSalaryCash + negativeGearingRefund;
-  const cashShortfall = Math.max(0, requiredAnnualCash - availableNonSalaryCash - negativeGearingRefund);
+  const totalCashAvailable = afterTaxSalary + availableNonSalaryCash + negativeGearingRefund + netDividend - dividendTopUpTax;
+  const cashShortfall = Math.max(0, requiredAnnualCash - availableNonSalaryCash - negativeGearingRefund - (netDividend - dividendTopUpTax));
   const cashSurplusDeficit = totalCashAvailable - requiredAnnualCash;
   const totalTax = companyTax + personalTaxTotal;
   const isHighTaxBracket = totalPersonalTaxableIncome > 190000;
@@ -147,5 +168,9 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     totalCashAvailable: ensureNumber(totalCashAvailable),
     cashSurplusDeficit: ensureNumber(cashSurplusDeficit),
     isHighTaxBracket,
+    netDividend: ensureNumber(netDividend),
+    frankingCredit: ensureNumber(frankingCredit),
+    grossedUpDividend: ensureNumber(grossedUpDividend),
+    dividendTopUpTax: ensureNumber(dividendTopUpTax),
   };
 }

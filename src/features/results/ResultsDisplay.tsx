@@ -3,6 +3,7 @@ import { Hero } from './Hero';
 import { SummaryMetrics } from './SummaryMetrics';
 import { CompanyTaxBreakdown } from './CompanyTaxBreakdown';
 import { PersonalTaxBreakdown } from './PersonalTaxBreakdown';
+import { DividendAnalysis } from './DividendAnalysis';
 import { CashFlowCheck } from './CashFlowCheck';
 
 export function ResultsDisplay() {
@@ -24,6 +25,7 @@ export function ResultsDisplay() {
       <div className="grid-2 section">
         <CompanyTaxBreakdown />
         <PersonalTaxBreakdown />
+        <DividendAnalysis />
       </div>
       <CashFlowCheck />
       <div className="footer">
