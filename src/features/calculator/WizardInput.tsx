@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTax } from '../../context/TaxContext';
+import InputField from '../../components/InputField';
 
 export function WizardInput() {
   const { inputs, set } = useTax();
@@ -59,14 +60,14 @@ export function WizardInput() {
       {renderInput("Spouse's employment income", 'Their salary or wages from their regular job', 'spouseOtherIncome', '/ yr')}
       {inputs.maximiseSuper && (
         <>
-          {renderInput(
-            "Spouse's employer super (annual)",
-            "SGC already paid by their regular employer — used to calculate remaining cap headroom",
-            'spouseExternalSuperContribution',
-            '/ yr',
-          )}
+          <InputField
+            label="Spouse's employer super (annual)"
+            sublabel="SGC already paid by their regular employer"
+            value={inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : Math.round((inputs.spouseOtherIncome || 0) * 0.12)}
+            onChange={set('spouseExternalSuperContribution')}
+          />
           <div className="info-box" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
-            Defaults to 0 — enter their employer's SGC if known, or use {`${((inputs.spouseOtherIncome || 0) * 0.12).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })}`} (12% of their salary as an estimate).
+            We estimate this as 12% of your spouse's employment income. Only override if their employer pays a different rate.
           </div>
         </>
       )}

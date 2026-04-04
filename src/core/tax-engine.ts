@@ -188,7 +188,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     recommendedSpouseSalary,
     maximiseSuper,
     availableProfitForSuper,
-    inputs.spouseExternalSuperContribution || 0,
+    inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : (inputs.spouseOtherIncome || 0) * SUPER_RATE
   );
   let superContribution = superResult.superContribution;
 
@@ -305,7 +305,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
         // Company tax with new salary structure (salary is deductible pre-tax)
         const newAvailableForSuper = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal);
-        const newSuperContrib = calculateSuperContribution(minOwnerSal, spouseSal, maximiseSuper, newAvailableForSuper, inputs.spouseExternalSuperContribution || 0).superContribution;
+        const newSuperContrib = calculateSuperContribution(minOwnerSal, spouseSal, maximiseSuper, newAvailableForSuper, inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : (inputs.spouseOtherIncome || 0) * SUPER_RATE).superContribution;
         const newCompanyTaxableProfit = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal - newSuperContrib);
         const newCompanyTax = newCompanyTaxableProfit * COMPANY_TAX_RATE;
 
@@ -385,7 +385,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
           recommendedSpouseSalary,
           maximiseSuper,
           optimisedAvailableProfit,
-          inputs.spouseExternalSuperContribution || 0,
+          inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : (inputs.spouseOtherIncome || 0) * SUPER_RATE
         );
         superContribution = optimisedSuperResult.superContribution;
 
@@ -437,7 +437,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   }
 
   const finalSuperResult = familyOptimisationActive && inputs.optimiseFamilyTax && inputs.jointOwnership
-    ? calculateSuperContribution(recommendedOwnerSalary, recommendedSpouseSalary, maximiseSuper, Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary), inputs.spouseExternalSuperContribution || 0)
+    ? calculateSuperContribution(recommendedOwnerSalary, recommendedSpouseSalary, maximiseSuper, Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary), inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : (inputs.spouseOtherIncome || 0) * SUPER_RATE)
     : superResult;
 
   return {
