@@ -1,58 +1,178 @@
 ﻿import { useTax } from '../../context/TaxContext';
-import { selectPersonalTaxBreakdown } from '../../core/selectors';
 import { fmt, fmtPct } from '../../utils/formatters';
+import { calcTotalPersonalTax } from '../../core/tax-engine';
+
+function TaxRow({ label, value, type }: { label: string; value: string; type?: 'neg' | 'pos' | 'gold' }) {
+  return (
+    <div className="tax-row">
+      <span className="tax-row-label">{label}</span>
+      <span className={`tax-row-value ${type === 'neg' ? 'negative' : type === 'pos' ? 'positive' : type === 'gold' ? 'gold' : ''}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0.65rem 0 0.25rem' }}>
+      {children}
+    </div>
+  );
+}
+
+interface PersonColumnProps {
+  title: string;
+  salary: number;
+  otherIncome?: number;
+  interestIncome?: number;
+  propertyIncome?: number;
+  grossedUpDiv?: number;
+  showDiv?: boolean;
+  investmentLoss: number;
+  grossIncome: number;
+  netTaxable: number;
+  ngRefund: number;
+  frankingCredit?: number;
+  tax: number;
+  effRate: number;
+  afterTaxTotal: number;
+  isSplit?: boolean;
+}
+
+function PersonColumn({
+  title, salary, otherIncome, interestIncome, propertyIncome, grossedUpDiv, showDiv,
+  investmentLoss, grossIncome, netTaxable, ngRefund, frankingCredit, tax, effRate, afterTaxTotal, isSplit
+}: PersonColumnProps) {
+  return (
+    <div style={{ flex: 1 }}>
+      <div style={{ color: '#a78bfa', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, borderBottom: '1px solid rgba(167,139,250,0.3)', paddingBottom: '0.4rem', marginBottom: '0.5rem' }}>
+        {title}
+      </div>
+      <SectionLabel>Income</SectionLabel>
+      <TaxRow label="Salary" value={fmt(salary)} />
+      {otherIncome !== undefined && otherIncome > 0 && <TaxRow label="Other income" value={fmt(otherIncome)} />}
+      {interestIncome !== undefined && interestIncome > 0 && <TaxRow label="Interest" value={fmt(interestIncome)} />}
+      {propertyIncome !== undefined && propertyIncome > 0 && <TaxRow label="Rental income" value={fmt(propertyIncome)} />}
+      {showDiv && grossedUpDiv !== undefined && grossedUpDiv > 0 && <TaxRow label="Grossed-up div." value={fmt(grossedUpDiv)} />}
+      <TaxRow label="Gross taxable" value={fmt(grossIncome)} />
+
+      <SectionLabel>Deductions & tax</SectionLabel>
+      {investmentLoss > 0 && (
+        <TaxRow label={`Investment loss ${isSplit ? '(50%)' : ''}`} value={`−${fmt(investmentLoss)}`} type="neg" />
+      )}
+      <TaxRow label="Net taxable" value={fmt(netTaxable)} />
+      {ngRefund > 0 && <TaxRow label="NG refund" value={`+${fmt(ngRefund)}`} type="pos" />}
+      {frankingCredit !== undefined && frankingCredit > 0 && <TaxRow label="Franking credit" value={`+${fmt(frankingCredit)}`} type="pos" />}
+      <TaxRow label="Tax + Medicare" value={`−${fmt(tax)}`} type="neg" />
+
+      <div style={{ background: 'rgba(167,139,250,0.1)', borderRadius: '6px', border: '1px solid rgba(167,139,250,0.2)', padding: '0.5rem 0.6rem', marginTop: '0.65rem' }}>
+        <TaxRow label="Effective rate" value={fmtPct(effRate)} type="gold" />
+        <div style={{ marginTop: '0.25rem' }}>
+          <TaxRow label="After-tax income" value={fmt(afterTaxTotal)} type="pos" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function PersonalTaxBreakdown() {
   const { inputs, results } = useTax();
-  // Pass a single state object to the selector
-  const breakdown = selectPersonalTaxBreakdown({ results, inputs });
 
-  if (!breakdown) return null;
+  if (!results) return null;
+
+  const hasSpouse = inputs.enableSpouseSplitting || inputs.jointOwnership;
+
+  // Compute owner figures:
+  const ownerGross = results.recommendedSalary + results.basePersonalTaxableIncome + (inputs.drawDividend ? results.grossedUpDividend : 0);
+  const ownerNetTaxable = results.totalPersonalTaxableIncome;
+  const ownerTax = results.personalTaxTotal;
+  const ownerNgRefund = results.ownerNegativeGearingRefund;
+  const ownerEffRate = results.effectivePersonalRate;
+  const ownerAfterTaxTotal = ownerGross - ownerTax;
+
+  // Compute spouse figures:
+  const spouseOtherIncome = inputs.spouseOtherIncome || 0;
+  const spouseGross = results.spouseSalary + spouseOtherIncome;
+  const spouseLoss = inputs.jointOwnership ? results.annualDeductibleInvestmentLoss / 2 : 0;
+  const spouseNetTaxable = Math.max(0, spouseGross - spouseLoss);
+  const spouseTaxOnBase = calcTotalPersonalTax(spouseOtherIncome);
+  const spouseTotalTax = results.spouseTax + spouseTaxOnBase;
+  const spouseEffRate = spouseGross > 0 ? (spouseTotalTax / spouseGross) * 100 : 0;
+  const spouseAfterTaxTotal = spouseGross - spouseTotalTax;
 
   return (
     <div className="panel-card">
-      <div className="panel-card-title"><span className="panel-card-dot" />Personal Tax</div>
-      <div className="tax-breakdown">
-        <h4 style={{ margin: '0.5rem 0', fontSize: '0.85rem', color: 'var(--panel-text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Income Sources</h4>
-        <div className="tax-row"><span className="tax-row-label">Salary</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary)}</span></div>
-        <div className="tax-row"><span className="tax-row-label">+ Interest Income</span><span className="tax-row-value">{fmt(breakdown.interestIncome)}</span></div>
-        <div className="tax-row"><span className="tax-row-label">+ Property Income</span><span className="tax-row-value">{fmt(breakdown.propertyIncome)}</span></div>
-        {breakdown.drawDividend && (
-          <div className="tax-row"><span className="tax-row-label">+ Grossed-up Dividend</span><span className="tax-row-value">{fmt(breakdown.grossedUpDividend)}</span></div>
-        )}
-        <div className="tax-row"><span className="tax-row-label">Gross Taxable Income</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary + breakdown.basePersonalTaxableIncome + (breakdown.drawDividend ? breakdown.grossedUpDividend : 0))}</span></div>
-
-        <h4 style={{ margin: '1rem 0 0.5rem', fontSize: '0.85rem', color: 'var(--panel-text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tax & Adjustments</h4>
-        {breakdown.annualDeductibleInvestmentLoss > 0 && (
-          <div className="tax-row"><span className="tax-row-label">Less: Deductible Investment Loss{breakdown.isSplit ? ' (50% Share)' : ''}</span><span className="tax-row-value negative">−{fmt(breakdown.annualDeductibleInvestmentLoss)}</span></div>
-        )}
-        <div className="tax-row"><span className="tax-row-label">Net Taxable Income</span><span className="tax-row-value">{fmt(breakdown.totalPersonalTaxableIncome)}</span></div>
-        {breakdown.negativeGearingRefund > 0 || breakdown.drawDividend ? (
-          <>
-            <div className="tax-row"><span className="tax-row-label">Estimated Tax (Gross)</span><span className="tax-row-value negative">−{fmt(breakdown.taxBeforeDeduction)}</span></div>
-            {breakdown.negativeGearingRefund > 0 && (
-              <div className="tax-row tax-row-indent"><span className="tax-row-label">Tax Saved (Negative Gearing)</span><span className="tax-row-value positive">+{fmt(breakdown.negativeGearingRefund)}</span></div>
-            )}
-            {breakdown.drawDividend && (
-              <div className="tax-row tax-row-indent"><span className="tax-row-label">Less: Franking Credit Offset</span><span className="tax-row-value positive">+{fmt(breakdown.frankingCredit)}</span></div>
-            )}
-            <div className="tax-row"><span className="tax-row-label">Final Income Tax + Medicare</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxTotal)}</span></div>
-          </>
-        ) : (
-          <div className="tax-row"><span className="tax-row-label">Income Tax + Medicare</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxTotal)}</span></div>
-        )}
-        <div className="tax-total"><span className="tax-total-label">Effective Rate <span title="Calculated as Total Tax divided by Gross Taxable Income" style={{ cursor: 'help', fontSize: '0.8em', marginLeft: '4px', verticalAlign: 'middle', opacity: 0.7 }}>ⓘ</span></span><span className="tax-row-value gold">{fmtPct(breakdown.effectivePersonalRate)}</span></div>
-
-        <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'var(--panel-text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Summary</h4>
-          <div className="tax-row"><span className="tax-row-label">Gross Salary</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary)}</span></div>
-          <div className="tax-row"><span className="tax-row-label">Less Allocated Tax</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxOnSalary)}</span></div>
-          <div className="tax-row" style={{ borderTop: '1px dashed var(--panel-border)', marginTop: '0.5rem', paddingTop: '0.5rem', fontWeight: 'bold' }}>
-            <span className="tax-row-label">Net Cash Salary</span>
-            <span className="tax-row-value positive">{fmt(breakdown.afterTaxSalary)}</span>
-          </div>
-        </div>
+      <div className="panel-card-title">
+        <span className="panel-card-dot" />
+        {hasSpouse ? 'Personal Tax — Owner & Spouse' : 'Personal Tax'}
       </div>
+
+      <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'flex-start' }}>
+        <PersonColumn
+          title="Owner"
+          salary={results.recommendedSalary}
+          interestIncome={inputs.interestIncome}
+          propertyIncome={inputs.propertyIncome}
+          showDiv={inputs.drawDividend}
+          grossedUpDiv={results.grossedUpDividend}
+          grossIncome={ownerGross}
+          investmentLoss={results.ownerDeductibleInvestmentLoss}
+          isSplit={inputs.jointOwnership}
+          netTaxable={ownerNetTaxable}
+          ngRefund={ownerNgRefund}
+          frankingCredit={inputs.drawDividend ? results.frankingCredit : undefined}
+          tax={ownerTax}
+          effRate={ownerEffRate}
+          afterTaxTotal={ownerAfterTaxTotal}
+        />
+
+        {hasSpouse && (
+          <>
+            <div style={{ background: 'var(--panel-border)', alignSelf: 'stretch', width: '1px' }} />
+            <PersonColumn
+              title="Spouse"
+              salary={results.spouseSalary}
+              otherIncome={spouseOtherIncome}
+              grossIncome={spouseGross}
+              investmentLoss={spouseLoss}
+              isSplit={inputs.jointOwnership}
+              netTaxable={spouseNetTaxable}
+              ngRefund={results.spouseNgRefund}
+              tax={spouseTotalTax}
+              effRate={spouseEffRate}
+              afterTaxTotal={spouseAfterTaxTotal}
+            />
+          </>
+        )}
+      </div>
+
+      {hasSpouse && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '6px', padding: '0.5rem 0.75rem', marginTop: '0.85rem' }}>
+          <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>Total family personal tax</span>
+          <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem' }}>−{fmt(ownerTax + spouseTotalTax)}</span>
+        </div>
+      )}
+
+      {inputs.optimiseFamilyTax && results.familyOptimisationMessage && (
+        <div style={{
+          marginTop: '0.75rem',
+          padding: '0.65rem 0.85rem',
+          borderRadius: '6px',
+          border: `1px solid ${results.familyOptimisationActive ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`,
+          background: results.familyOptimisationActive ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.04)',
+        }}>
+          {results.familyOptimisationActive && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--panel-text-mid)' }}>Potential family tax saving</span>
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#4ade80' }}>+{fmt(results.familyTaxSaving)}</span>
+            </div>
+          )}
+          <p style={{ fontSize: '0.68rem', color: 'var(--panel-text-dim)', lineHeight: 1.5, margin: 0 }}>
+            {results.familyOptimisationMessage}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

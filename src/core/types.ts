@@ -11,6 +11,7 @@
   enableSpouseSplitting: boolean;
   jointOwnership: boolean;
   spouseOtherIncome: number;
+  optimiseFamilyTax: boolean;
 }
 
 export interface CalcResults {
@@ -41,6 +42,8 @@ export interface CalcResults {
   // Summary
   totalTax: number;
   spouseTax: number;
+  spouseNgRefund: number;
+  afterTaxSpouseSalary: number;
   totalFamilyTax: number;
   effectivePersonalRate: number;
   effectiveCompanyRate: number;
@@ -53,4 +56,9 @@ export interface CalcResults {
   frankingCredit: number;
   grossedUpDividend: number;
   dividendTopUpTax: number;
+  // Family tax optimisation
+  familyTaxSaving: number;
+  extraSpouseSalary: number;
+  familyOptimisationActive: boolean;
+  familyOptimisationMessage: string;
 }

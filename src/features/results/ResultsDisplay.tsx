@@ -5,7 +5,6 @@ import { CompanyTaxBreakdown } from './CompanyTaxBreakdown';
 import { PersonalTaxBreakdown } from './PersonalTaxBreakdown';
 import { DividendAnalysis } from './DividendAnalysis';
 import { CashFlowCheck } from './CashFlowCheck';
-import { FamilyTaxSummary } from './FamilyTaxSummary';
 
 export function ResultsDisplay() {
   const { results } = useTax();
@@ -23,12 +22,11 @@ export function ResultsDisplay() {
     <>
       <Hero />
       <SummaryMetrics />
-      <FamilyTaxSummary />
       <div className="grid-2 section">
         <CompanyTaxBreakdown />
         <PersonalTaxBreakdown />
-        <DividendAnalysis />
       </div>
+      <DividendAnalysis />
       <CashFlowCheck />
       <div className="footer">
         <p>For informational purposes only — not financial or tax advice.</p>

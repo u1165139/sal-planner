@@ -13,6 +13,7 @@ export const CalcInputsSchema = z.object({
   enableSpouseSplitting: z.boolean(),
   jointOwnership: z.boolean(),
   spouseOtherIncome: z.number().min(0, "Spouse other income must be positive"),
+  optimiseFamilyTax: z.boolean(),
 });
 
 export type InputValidationErrors = z.ZodError<z.infer<typeof CalcInputsSchema>>;

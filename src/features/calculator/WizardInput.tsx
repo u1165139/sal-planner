@@ -98,7 +98,11 @@ export function WizardInput() {
               () => {
                 const next = !existingJoint;
                 setExistingJoint(next);
-                set('jointOwnership')(next || newJoint);
+                const turningOn = next || newJoint;
+                set('jointOwnership')(turningOn);
+                if (turningOn && (inputs.spouseOtherIncome === 0 || inputs.spouseOtherIncome === undefined)) {
+                  set('spouseOtherIncome')(100000);
+                }
               },
               <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, display: 'block' }}>
                 Both the rental income and any deductible losses will be split equally between you and your spouse on your respective tax returns.
@@ -135,7 +139,11 @@ export function WizardInput() {
               () => {
                 const next = !newJoint;
                 setNewJoint(next);
-                set('jointOwnership')(existingJoint || next);
+                const turningOn = existingJoint || next;
+                set('jointOwnership')(turningOn);
+                if (turningOn && (inputs.spouseOtherIncome === 0 || inputs.spouseOtherIncome === undefined)) {
+                  set('spouseOtherIncome')(100000);
+                }
               },
               <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, display: 'block' }}>
                 Each person claims half the deductible loss, which may reduce the total tax refund depending on your spouse's marginal rate.
@@ -166,12 +174,22 @@ export function WizardInput() {
           'Split salary with my spouse',
           'Optimizer distributes salary between you both to minimize total family tax',
           inputs.enableSpouseSplitting,
-          () => set('enableSpouseSplitting')(!inputs.enableSpouseSplitting),
+          () => set('enableSpouseSplitting')(!inputs.enableSpouseSplitting)
+        )}
+
+        {(inputs.enableSpouseSplitting || inputs.jointOwnership) && (
           <>
-            {renderInput("Spouse's other annual income", 'Their income before any salary from your company', 'spouseOtherIncome', '/ yr')}
-            <div className="info-box" style={{ marginTop: '0.6rem', marginBottom: 0 }}>
+            {renderInput("Spouse's Employment Income (Annual)", 'Their salary or wages from their regular job — before any income from your company', 'spouseOtherIncome', '/ yr')}
+            <div className="info-box" style={{ marginTop: '0.6rem', marginBottom: '1rem' }}>
               The optimizer will fill your spouse's lower tax brackets first (starting with the $18,200 tax-free threshold) to maximize your family's savings.
             </div>
+
+            {renderToggleCard(
+              'Optimise family tax',
+              'Route additional company profit to your spouse if their marginal tax rate is lower than yours — minimising total family tax.',
+              inputs.optimiseFamilyTax,
+              () => set('optimiseFamilyTax')(!inputs.optimiseFamilyTax)
+            )}
           </>
         )}
 
