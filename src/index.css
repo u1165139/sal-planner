@@ -403,6 +403,31 @@ body {
 .surplus-value.pos { color: #4ade80; }
 .surplus-value.neg { color: #f87171; }
 
+.high-tax-badge {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+.high-tax-badge span {
+  color: #f87171;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+.high-tax-badge p {
+  color: var(--panel-text-dim);
+  font-size: 0.72rem;
+  margin-top: 0.1rem;
+}
+.hero-amount.high-tax span {
+  color: #f87171;
+}
+
 /* ── Super note ── */
 .super-note {
   background: rgba(167, 139, 250, 0.1);

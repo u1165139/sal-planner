@@ -11,14 +11,15 @@ export function Hero() {
 
   return (
     <>
-      {summary.isHighTaxBracket && (
-        <div className="surplus-banner deficit" style={{ marginBottom: '1rem' }}>
-          ⚠️ High Tax Alert: Salary exceeds $190k (45% bracket)
-        </div>
-      )}
       <div className="hero-card section">
         <div className="hero-eyebrow">Recommended Annual Salary</div>
-      <div className="hero-amount"><span>{fmt(summary.recommendedSalary)}</span></div>
+        {summary.isHighTaxBracket && (
+          <div className="high-tax-badge">
+            <span>⚠️ High Tax Alert</span>
+            <p>Income over $190k is taxed at 47%. Efficiency is low.</p>
+          </div>
+        )}
+      <div className={`hero-amount ${summary.isHighTaxBracket ? 'high-tax' : ''}`}><span>{fmt(summary.recommendedSalary)}</span></div>
       {summary.maximiseSuper && summary.superContribution > 0 && (
         <div className="super-note">
           +&nbsp;<strong>{fmt(summary.superContribution)}</strong> employer super (SGC 11.5%) — deductible to company, not cash-in-hand
