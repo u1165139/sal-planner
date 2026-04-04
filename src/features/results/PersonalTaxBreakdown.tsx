@@ -41,11 +41,17 @@ export function PersonalTaxBreakdown() {
         ) : (
           <div className="tax-row"><span className="tax-row-label">Income Tax + Medicare</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxTotal)}</span></div>
         )}
-        <div className="tax-row" style={{ borderTop: '1px dashed var(--panel-border)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
-          <span className="tax-row-label">Est. Net Take-Home Salary</span>
-          <span className="tax-row-value positive">{fmt(breakdown.afterTaxSalary)}</span>
-        </div>
         <div className="tax-total"><span className="tax-total-label">Effective Rate <span title="Calculated as Total Tax divided by Gross Taxable Income" style={{ cursor: 'help', fontSize: '0.8em', marginLeft: '4px', verticalAlign: 'middle', opacity: 0.7 }}>ⓘ</span></span><span className="tax-row-value gold">{fmtPct(breakdown.effectivePersonalRate)}</span></div>
+
+        <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'var(--panel-text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Summary</h4>
+          <div className="tax-row"><span className="tax-row-label">Gross Salary</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary)}</span></div>
+          <div className="tax-row"><span className="tax-row-label">Less Allocated Tax</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxOnSalary)}</span></div>
+          <div className="tax-row" style={{ borderTop: '1px dashed var(--panel-border)', marginTop: '0.5rem', paddingTop: '0.5rem', fontWeight: 'bold' }}>
+            <span className="tax-row-label">Net Cash Salary</span>
+            <span className="tax-row-value positive">{fmt(breakdown.afterTaxSalary)}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
