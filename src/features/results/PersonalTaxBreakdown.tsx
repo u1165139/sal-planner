@@ -44,12 +44,13 @@ interface PersonColumnProps {
   mandatorySuper?: number;
   voluntarySuper?: number;
   externalSGC?: number;
+  afterTaxSalary?: number;
 }
 
 function PersonColumn({
   title, salary, otherIncome, interestIncome, propertyIncome, grossedUpDiv, showDiv,
   investmentLoss, grossIncome, netTaxable, ngRefund, frankingCredit, tax, effRate, afterTaxTotal, isSplit,
-  mandatorySuper, voluntarySuper, externalSGC
+  mandatorySuper, voluntarySuper, externalSGC, afterTaxSalary
 }: PersonColumnProps) {
   return (
     <div style={{ flex: 1 }}>
@@ -106,9 +107,15 @@ function PersonColumn({
           );
         })()}
 
-        <div className="tax-row total-row">
-          <span className="tax-row-label">Income</span>
-          <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(afterTaxTotal)}</span>
+        {afterTaxSalary !== undefined && (
+          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
+            <span className="tax-row-label">After-tax salary</span>
+            <span className="tax-row-value positive">{fmt(afterTaxSalary)}</span>
+          </div>
+        )}
+        <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid rgba(167,139,250,0.2)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
+          <span className="tax-row-label">After-tax income (all sources)</span>
+          <span className="tax-row-value positive">{fmt(afterTaxTotal)}</span>
         </div>
       </div>
     </div>
@@ -166,6 +173,7 @@ export function PersonalTaxBreakdown() {
           afterTaxTotal={ownerAfterTaxTotal}
           mandatorySuper={results.recommendedSalary * SUPER_RATE}
           voluntarySuper={results.ownerVoluntaryContribution}
+          afterTaxSalary={results.recommendedSalary - results.personalTaxOnSalary}
         />
 
         {hasSpouse && (
@@ -186,6 +194,7 @@ export function PersonalTaxBreakdown() {
               mandatorySuper={results.spouseSalary * SUPER_RATE}
               voluntarySuper={results.spouseVoluntaryContribution}
               externalSGC={inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : (inputs.spouseOtherIncome || 0) * SUPER_RATE}
+              afterTaxSalary={results.afterTaxSpouseSalary}
             />
           </>
         )}
