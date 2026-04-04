@@ -123,7 +123,7 @@ export function InputTabs() {
         >
           <div>
             <div className="toggle-label">Maximise Concessional Contributions</div>
-            <div className="toggle-sublabel">SGC 11.5% of salary · Capped at $30,000 · Deductible to company</div>
+            <div className="toggle-sublabel">SGC (11.5%) always applies. Toggle to maximise to the $30,000 concessional cap.</div>
           </div>
           <div className={`toggle-switch ${inputs.maximiseSuper ? 'on' : ''}`} />
         </div>

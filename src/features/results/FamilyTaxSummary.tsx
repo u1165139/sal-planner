@@ -5,18 +5,18 @@ import { calcTotalPersonalTax } from '../../core/tax-engine';
 export function FamilyTaxSummary() {
   const { inputs, results } = useTax();
 
-  if (!results || !inputs.enableSpouseSplitting) {
+  if (!results || !(inputs.enableSpouseSplitting || inputs.jointOwnership)) {
     return null;
   }
 
-  const { recommendedSalary, spouseSalary, basePersonalTaxableIncome, annualDeductibleInvestmentLoss, grossedUpDividend } = results;
+  const { recommendedSalary, spouseSalary, basePersonalTaxableIncome, grossedUpDividend } = results;
 
   // Total salary distributed from the business
   const totalDistributedSalary = recommendedSalary + spouseSalary;
 
   // Calculate tax if owner took the full salary
   const grossIncomeOwnerOnly = totalDistributedSalary + basePersonalTaxableIncome + grossedUpDividend;
-  const taxOwnerOnly = calcTotalPersonalTax(Math.max(0, grossIncomeOwnerOnly - annualDeductibleInvestmentLoss));
+  const taxOwnerOnly = calcTotalPersonalTax(Math.max(0, grossIncomeOwnerOnly - results.ownerDeductibleInvestmentLoss));
 
   // Calculate tax base for spouse if they had no salary from business
   const spouseBaseTax = calcTotalPersonalTax(inputs.spouseOtherIncome || 0);
