@@ -21,6 +21,7 @@ export const selectHeroSummary = createSelector(
       netBusinessProfit: results.netBusinessProfit,
       businessRevenue: results.businessRevenue,
       maximiseSuper: inputs.maximiseSuper,
+      isHighTaxBracket: results.isHighTaxBracket,
     };
   }
 );
@@ -47,6 +48,7 @@ export const selectCompanyTaxBreakdown = createSelector(
   (results, inputs) => {
     if (!results) return null;
     return {
+      businessRevenue: results.businessRevenue,
       netBusinessProfit: results.netBusinessProfit,
       recommendedSalary: results.recommendedSalary,
       superContribution: results.superContribution,

@@ -114,6 +114,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const cashShortfall = Math.max(0, requiredAnnualCash - availableNonSalaryCash - negativeGearingRefund);
   const cashSurplusDeficit = totalCashAvailable - requiredAnnualCash;
   const totalTax = companyTax + personalTaxTotal;
+  const isHighTaxBracket = totalPersonalTaxableIncome > 190000;
 
   return {
     businessRevenue: ensureNumber(businessRevenue),
@@ -138,5 +139,6 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     afterTaxSalary: ensureNumber(afterTaxSalary),
     totalCashAvailable: ensureNumber(totalCashAvailable),
     cashSurplusDeficit: ensureNumber(cashSurplusDeficit),
+    isHighTaxBracket,
   };
 }

@@ -13,6 +13,7 @@ export function CompanyTaxBreakdown() {
     <div className="panel-card">
       <div className="panel-card-title"><span className="panel-card-dot" />Company Tax</div>
       <div className="tax-breakdown">
+        <div className="tax-row"><span className="tax-row-label">Revenue (Excl. GST)</span><span className="tax-row-value">{fmt(breakdown.businessRevenue)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Net Profit (Before Salary)</span><span className="tax-row-value">{fmt(breakdown.netBusinessProfit)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Less: Owner Salary</span><span className="tax-row-value negative">−{fmt(breakdown.recommendedSalary)}</span></div>
         {breakdown.maximiseSuper && breakdown.superContribution > 0 && (

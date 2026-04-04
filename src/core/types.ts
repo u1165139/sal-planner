@@ -40,4 +40,5 @@ export interface CalcResults {
   afterTaxSalary: number;
   totalCashAvailable: number;
   cashSurplusDeficit: number;
+  isHighTaxBracket: boolean;
 }
