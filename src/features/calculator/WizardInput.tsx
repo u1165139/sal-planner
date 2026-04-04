@@ -20,8 +20,8 @@ export function WizardInput() {
         <input
           type="number"
           className="input-field"
-          value={(inputs as any)[key] || ''}
-          onChange={e => set(key as any)(parseFloat(e.target.value) || 0)}
+          value={Number(inputs[key]) || ''}
+          onChange={e => set(key)(parseFloat(e.target.value) || 0)}
           placeholder="0"
         />
         <span className="input-suffix">{suffix}</span>
@@ -50,6 +50,22 @@ export function WizardInput() {
         </div>
       )}
     </div>
+  );
+
+  const renderJointBody = (explanation: string) => (
+    <>
+      <div style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '0.75rem' }}>
+        {explanation}
+      </div>
+      {renderInput("Spouse's employment income", 'Their salary or wages from their regular job', 'spouseOtherIncome', '/ yr')}
+      <div className="toggle-row" style={{ padding: '0.4rem 0.6rem', marginTop: '0.5rem', borderRadius: '6px', cursor: 'pointer' }} onClick={() => set('optimiseFamilyTax')(!inputs.optimiseFamilyTax)}>
+        <div>
+          <div className="toggle-label">Pay spouse to reduce family tax</div>
+          <div className="toggle-sublabel">If your tax bracket is higher than your spouse's, suggests an optimal extra salary to pay them from company profit</div>
+        </div>
+        <div className={`toggle-switch ${inputs.optimiseFamilyTax ? 'on' : ''}`} />
+      </div>
+    </>
   );
 
   return (
@@ -104,9 +120,7 @@ export function WizardInput() {
                   set('spouseOtherIncome')(100000);
                 }
               },
-              <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, display: 'block' }}>
-                Both the rental income and any deductible losses will be split equally between you and your spouse on your respective tax returns.
-              </span>
+              renderJointBody('Both the rental income and any deductible losses will be split equally between you and your spouse on your respective tax returns.')
             )}
           </>
         )}
@@ -145,9 +159,7 @@ export function WizardInput() {
                   set('spouseOtherIncome')(100000);
                 }
               },
-              <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, display: 'block' }}>
-                Each person claims half the deductible loss, which may reduce the total tax refund depending on your spouse's marginal rate.
-              </span>
+              renderJointBody('Each person claims half the deductible loss on their own tax return.')
             )}
           </>
         )}
@@ -170,28 +182,6 @@ export function WizardInput() {
           renderInput('Annual interest income', '', 'interestIncome', '/ yr')
         )}
 
-        {renderToggleCard(
-          'Split salary with my spouse',
-          'Optimizer distributes salary between you both to minimize total family tax',
-          inputs.enableSpouseSplitting,
-          () => set('enableSpouseSplitting')(!inputs.enableSpouseSplitting)
-        )}
-
-        {(inputs.enableSpouseSplitting || inputs.jointOwnership) && (
-          <>
-            {renderInput("Spouse's Employment Income (Annual)", 'Their salary or wages from their regular job — before any income from your company', 'spouseOtherIncome', '/ yr')}
-            <div className="info-box" style={{ marginTop: '0.6rem', marginBottom: '1rem' }}>
-              The optimizer will fill your spouse's lower tax brackets first (starting with the $18,200 tax-free threshold) to maximize your family's savings.
-            </div>
-
-            {renderToggleCard(
-              'Minimise bracket tax',
-              'Pay your spouse an additional salary from company profit to move income out of your higher tax bracket — only if it reduces total family tax.',
-              inputs.optimiseFamilyTax,
-              () => set('optimiseFamilyTax')(!inputs.optimiseFamilyTax)
-            )}
-          </>
-        )}
 
         {renderToggleCard(
           'Pay maximum super this year',

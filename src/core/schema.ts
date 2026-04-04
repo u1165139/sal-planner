@@ -10,7 +10,6 @@ export const CalcInputsSchema = z.object({
   propertyIncome: z.number().min(0, "Property income must be positive"),
   maximiseSuper: z.boolean(),
   drawDividend: z.boolean(),
-  enableSpouseSplitting: z.boolean(),
   jointOwnership: z.boolean(),
   spouseOtherIncome: z.number().min(0, "Spouse other income must be positive"),
   optimiseFamilyTax: z.boolean(),

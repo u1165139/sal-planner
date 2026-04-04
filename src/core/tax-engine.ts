@@ -51,7 +51,6 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     interestIncome,
     propertyIncome,
     maximiseSuper,
-    optimiseFamilyTax,
   } = inputs;
 
   // ── Base calculations ──────────────────────────────────────────────────────
@@ -65,42 +64,6 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const splitLossOwner = inputs.jointOwnership ? annualDeductibleInvestmentLoss / 2 : annualDeductibleInvestmentLoss;
   const splitLossSpouse = inputs.jointOwnership ? annualDeductibleInvestmentLoss / 2 : 0;
 
-  const findBestSplit = (totalSalary: number) => {
-    let bestO = totalSalary;
-    let minTax = Infinity;
-    const spouseBase = inputs.spouseOtherIncome || 0;
-
-    const evaluate = (o: number) => {
-      const s = totalSalary - o;
-      const taxO = calcTotalPersonalTax(Math.max(0, o + basePersonalTaxableIncome - splitLossOwner));
-      const taxS = calcTotalPersonalTax(Math.max(0, s + spouseBase - splitLossSpouse));
-      return taxO + taxS;
-    };
-
-    const steps = 200;
-    for (let i = 0; i <= steps; i++) {
-      const o = (totalSalary * i) / steps;
-      const tax = evaluate(o);
-      if (tax < minTax) {
-        minTax = tax;
-        bestO = o;
-      }
-    }
-
-    const fineRange = totalSalary / steps;
-    const start = Math.max(0, bestO - fineRange);
-    const end = Math.min(totalSalary, bestO + fineRange);
-    for (let i = 0; i <= steps; i++) {
-      const o = start + ((end - start) * i) / steps;
-      const tax = evaluate(o);
-      if (tax <= minTax) {
-        minTax = tax;
-        bestO = o;
-      }
-    }
-
-    return { ownerSalary: bestO, spouseSalary: totalSalary - bestO };
-  };
 
   // ── Binary search for recommended salary ──────────────────────────────────
   const availableNonSalaryCash = interestIncome;
@@ -109,14 +72,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   let totalRecommendedSalary = 0;
 
   const computeCash = (totalSalary: number) => {
-    let ownerSal = totalSalary;
-    let spouseSal = 0;
-
-    if (inputs.enableSpouseSplitting) {
-      const split = findBestSplit(totalSalary);
-      ownerSal = split.ownerSalary;
-      spouseSal = split.spouseSalary;
-    }
+    const ownerSal = totalSalary;
+    const spouseSal = 0;
 
     const grossIncome = ownerSal + basePersonalTaxableIncome;
     const taxWithout = calcTotalPersonalTax(grossIncome);
@@ -129,7 +86,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
     let afterTaxSpouse = 0;
     let ngRefundSpouse = 0;
-    if (inputs.enableSpouseSplitting || inputs.jointOwnership) {
+    if (inputs.jointOwnership) {
       const sGross = spouseSal + (inputs.spouseOtherIncome || 0);
       const sTaxWithout = calcTotalPersonalTax(sGross);
       const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
@@ -172,7 +129,6 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     // Calculate total effective cap based on who receives a salary
     let totalCap = 0;
     if (recommendedOwnerSalary > 0) totalCap += SUPER_CAP;
-    if (inputs.enableSpouseSplitting && recommendedSpouseSalary > 0) totalCap += SUPER_CAP;
     // Default to at least one cap if salaries haven't been mapped yet but profit exists
     if (totalCap === 0) totalCap = SUPER_CAP;
 
@@ -222,7 +178,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   let spouseNgRefund = 0;
   let spouseTax = 0;
   let afterTaxSpouseSalary = 0;
-  if (inputs.enableSpouseSplitting || inputs.jointOwnership) {
+  if (inputs.jointOwnership) {
     const sGross = recommendedSpouseSalary + (inputs.spouseOtherIncome || 0);
     const sTaxWithout = calcTotalPersonalTax(sGross);
     const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
@@ -250,82 +206,107 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const totalFamilyTax = companyTax + personalTaxTotal + spouseTax;
   const isHighTaxBracket = totalPersonalTaxableIncome > 190000;
 
-  // ── Family tax optimisation ────────────────────────────────────────────────
+  // ── Family tax bracket optimisation ───────────────────────────────────────
   let extraSpouseSalary = 0;
   let familyTaxSaving = 0;
   let familyOptimisationActive = false;
   let familyOptimisationMessage = '';
 
-  if (optimiseFamilyTax && (inputs.enableSpouseSplitting || inputs.jointOwnership)) {
+  if (inputs.optimiseFamilyTax && inputs.jointOwnership) {
     const spouseBase = inputs.spouseOtherIncome || 0;
-    const availableForOptimisation = Math.max(0, companyAfterTaxProfit);
 
-    // Owner's marginal rate on next dollar (using $100 probe for accuracy)
+    // Owner's marginal rate on the current salary
     const ownerMarginal = (calcTotalPersonalTax(totalPersonalTaxableIncome + 100) - calcTotalPersonalTax(totalPersonalTaxableIncome)) / 100;
 
-    // Spouse's current marginal rate on next dollar (on their existing income after loss)
+    // Spouse's marginal rate on their existing income
     const spouseCurrentNet = Math.max(0, spouseBase - splitLossSpouse);
     const spouseMarginal = (calcTotalPersonalTax(spouseCurrentNet + 100) - calcTotalPersonalTax(spouseCurrentNet)) / 100;
 
     if (ownerMarginal <= spouseMarginal) {
-      familyOptimisationMessage = `No benefit: your marginal rate (${Math.round(ownerMarginal * 100)}%) is not higher than your spouse's current rate (${Math.round(spouseMarginal * 100)}%). Routing more salary to your spouse would not reduce family tax.`;
-    } else if (availableForOptimisation < 1000) {
-      familyOptimisationMessage = `No company profit available to redistribute. All profit has been drawn as salary or retained for super.`;
+      familyOptimisationMessage = `No benefit: your marginal rate (${Math.round(ownerMarginal * 100)}%) is not higher than your spouse's current rate (${Math.round(spouseMarginal * 100)}%). Routing salary to your spouse would not reduce family tax.`;
     } else {
-      // Binary search: find the optimal extra spouse salary from company profit
-      // that minimises total family tax (personal tax both people + company tax)
-      // Constraint: owner salary stays fixed at recommendedOwnerSalary (cash needs are met)
-      // Extra spouse salary comes purely from company after-tax profit being paid as salary instead
+      // The correct approach: shift salary from owner to spouse.
+      // "Required owner after-tax cash" = what the base scenario delivers to the owner.
+      const baseOwnerGross = recommendedOwnerSalary + basePersonalTaxableIncome;
+      const baseOwnerTaxOnSalary = calcTotalPersonalTax(baseOwnerGross) - calcTotalPersonalTax(basePersonalTaxableIncome);
+      const requiredOwnerAfterTaxCash = recommendedOwnerSalary - baseOwnerTaxOnSalary;
 
-      const computeFamilyTax = (extraSpouse: number) => {
-        // Extra salary paid to spouse reduces company taxable profit
-        // (salary is deductible, so company saves 25% on each dollar paid)
-        const companySalaryDeduction = extraSpouse;
-        const newCompanyTaxableProfit = Math.max(0, companyTaxableProfit - companySalaryDeduction);
+      // Helper: given a fixed spouse salary from company, find minimum owner salary
+      // that delivers requiredOwnerAfterTaxCash collectively, and return total family tax.
+      const evaluateSpouseSalary = (spouseSal: number) => {
+        // 1. Calculate how much net cash the spouse brings home from this salary
+        const spouseTotalGross = spouseSal + spouseBase;
+        const spouseNetIncome = Math.max(0, spouseTotalGross - splitLossSpouse);
+        const spouseTotalTax = calcTotalPersonalTax(spouseNetIncome);
+        const spouseTaxBase = calcTotalPersonalTax(Math.max(0, spouseBase - splitLossSpouse));
+        const extraSpouseTax = spouseTotalTax - spouseTaxBase;
+        const spouseNetContrib = spouseSal - extraSpouseTax;
+
+        // 2. Reduce the owner's required cash by the spouse's net contribution
+        const targetOwnerCash = Math.max(0, requiredOwnerAfterTaxCash - spouseNetContrib);
+
+        // 3. Binary search for minimum owner salary to hit targetOwnerCash
+        let lo = 0;
+        let hi = Math.max(netBusinessProfit, 1_000_000);
+        for (let i = 0; i < 80; i++) {
+          const mid = (lo + hi) / 2;
+          const ownerGross = mid + basePersonalTaxableIncome;
+          const ownerTaxOnSalary = calcTotalPersonalTax(ownerGross) - calcTotalPersonalTax(basePersonalTaxableIncome);
+          const ownerAfterTax = mid - ownerTaxOnSalary;
+          if (ownerAfterTax < targetOwnerCash) lo = mid; else hi = mid;
+        }
+        const minOwnerSal = (lo + hi) / 2;
+
+        // 4. Company tax
+        const newSuperContrib = (minOwnerSal + spouseSal) * SUPER_RATE;
+        const newCompanyTaxableProfit = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal - newSuperContrib);
         const newCompanyTax = newCompanyTaxableProfit * COMPANY_TAX_RATE;
 
-        // Owner tax unchanged — owner salary is fixed
-        const newOwnerTax = personalTaxTotal;
+        // 5. Total Family Tax
+        const ownerGrossFinal = minOwnerSal + basePersonalTaxableIncome;
+        const ownerTax = calcTotalPersonalTax(Math.max(0, ownerGrossFinal - splitLossOwner));
 
-        // Spouse tax on their total income including extra salary
-        const spouseTotalIncome = spouseBase + extraSpouse;
-        const spouseNetIncome = Math.max(0, spouseTotalIncome - splitLossSpouse);
-        const spouseTaxBase = calcTotalPersonalTax(Math.max(0, spouseBase - splitLossSpouse));
-        const newSpouseTax = calcTotalPersonalTax(spouseNetIncome) - spouseTaxBase + spouseTax;
-
-        return newCompanyTax + newOwnerTax + newSpouseTax;
+        return {
+          totalFamilyTax: newCompanyTax + ownerTax + spouseTotalTax,
+          minOwnerSal,
+          newCompanyTax,
+          ownerTax,
+          spouseTotalTax,
+        };
       };
 
-      // Find the extra spouse salary amount that minimises total family tax
-      // Search in steps then refine
-      let bestExtra = 0;
-      let bestTax = computeFamilyTax(0);
+      // Search over spouse salary amounts from 0 to netBusinessProfit
+      // in 200 steps, then refine
+      const baseFamilyTax = evaluateSpouseSalary(0).totalFamilyTax;
+      let bestSpouseSal = 0;
+      let bestFamilyTax = baseFamilyTax;
       const steps = 200;
+      const maxSpouseSal = Math.max(0, netBusinessProfit - recommendedOwnerSalary);
+
       for (let i = 1; i <= steps; i++) {
-        const extra = (availableForOptimisation * i) / steps;
-        const tax = computeFamilyTax(extra);
-        if (tax < bestTax) {
-          bestTax = tax;
-          bestExtra = extra;
+        const spouseSal = (maxSpouseSal * i) / steps;
+        const { totalFamilyTax } = evaluateSpouseSalary(spouseSal);
+        if (totalFamilyTax < bestFamilyTax) {
+          bestFamilyTax = totalFamilyTax;
+          bestSpouseSal = spouseSal;
         }
       }
 
       // Fine search around best
-      const fineRange = availableForOptimisation / steps;
-      const fineStart = Math.max(0, bestExtra - fineRange);
-      const fineEnd = Math.min(availableForOptimisation, bestExtra + fineRange);
+      const fineRange = maxSpouseSal / steps;
+      const fineStart = Math.max(0, bestSpouseSal - fineRange);
+      const fineEnd = Math.min(maxSpouseSal, bestSpouseSal + fineRange);
       for (let i = 0; i <= steps; i++) {
-        const extra = fineStart + ((fineEnd - fineStart) * i) / steps;
-        const tax = computeFamilyTax(extra);
-        if (tax < bestTax) {
-          bestTax = tax;
-          bestExtra = extra;
+        const spouseSal = fineStart + ((fineEnd - fineStart) * i) / steps;
+        const { totalFamilyTax } = evaluateSpouseSalary(spouseSal);
+        if (totalFamilyTax < bestFamilyTax) {
+          bestFamilyTax = totalFamilyTax;
+          bestSpouseSal = spouseSal;
         }
       }
 
-      extraSpouseSalary = bestExtra;
-      const currentFamilyTax = companyTax + personalTaxTotal + spouseTax;
-      familyTaxSaving = currentFamilyTax - bestTax;
+      extraSpouseSalary = bestSpouseSal;
+      familyTaxSaving = baseFamilyTax - bestFamilyTax;
 
       if (familyTaxSaving > 50 && extraSpouseSalary > 100) {
         familyOptimisationActive = true;
@@ -334,9 +315,10 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
         const extraK = extraSpouseSalary >= 1000
           ? `$${Math.round(extraSpouseSalary / 1000)}k`
           : `$${Math.round(extraSpouseSalary)}`;
-        familyOptimisationMessage = `Paying your spouse an extra ${extraK} from company profit saves $${Math.round(familyTaxSaving).toLocaleString()} in total family tax — moving income from your ${ownerRatePct}% bracket to your spouse's ${spouseRatePct}% bracket.`;
+        const saving = Math.round(familyTaxSaving).toLocaleString();
+        familyOptimisationMessage = `Paying your spouse ${extraK} from the company (instead of routing it to you) saves $${saving} in total family tax — shifting income from your ${ownerRatePct}% bracket to your spouse's ${spouseRatePct}% bracket. Your take-home pay is unchanged.`;
       } else {
-        familyOptimisationMessage = `After accounting for the 25% company tax already paid on this profit, routing additional salary to your spouse does not meaningfully reduce total family tax.`;
+        familyOptimisationMessage = `No meaningful saving found. The gap between your marginal rates (${Math.round(ownerMarginal * 100)}% vs ${Math.round(spouseMarginal * 100)}%) is not large enough to overcome the difference in company tax treatment.`;
       }
     }
   }

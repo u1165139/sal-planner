@@ -8,7 +8,6 @@
   propertyIncome: number;
   maximiseSuper: boolean;
   drawDividend: boolean;
-  enableSpouseSplitting: boolean;
   jointOwnership: boolean;
   spouseOtherIncome: number;
   optimiseFamilyTax: boolean;

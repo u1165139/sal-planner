@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface InputFieldProps {
   label: string;
@@ -20,13 +20,15 @@ export default function InputField({
   error,
 }: InputFieldProps) {
   const [localValue, setLocalValue] = useState(String(value));
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     const parsed = parseFloat(localValue);
     if (parsed !== value && !(isNaN(parsed) && value === 0)) {
       setLocalValue(String(value));
     }
-  }, [value]);
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
