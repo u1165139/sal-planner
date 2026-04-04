@@ -287,6 +287,7 @@ body {
   font-size: 0.78rem;
 }
 .tax-row:last-child { border-bottom: none; }
+.tax-row-indent { padding-left: 1.25rem; font-size: 0.72rem; opacity: 0.8; }
 .tax-row-label { color: var(--panel-text-mid); }
 .tax-row-value { color: var(--panel-text); font-weight: 600; }
 .tax-row-value.negative { color: #f87171; }
@@ -424,8 +425,8 @@ body {
   font-size: 0.72rem;
   margin-top: 0.1rem;
 }
-.hero-amount.high-tax span {
-  color: #f87171;
+.hero-card .hero-amount.high-tax span {
+  color: var(--red) !important;
 }
 
 /* ── Super note ── */
