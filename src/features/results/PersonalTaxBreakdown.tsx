@@ -29,7 +29,7 @@ export function PersonalTaxBreakdown() {
         <div className="tax-row"><span className="tax-row-label">Net Taxable Income</span><span className="tax-row-value">{fmt(breakdown.totalPersonalTaxableIncome)}</span></div>
         {breakdown.negativeGearingRefund > 0 || breakdown.drawDividend ? (
           <>
-            <div className="tax-row"><span className="tax-row-label">Base Tax on Total Income</span><span className="tax-row-value negative">−{fmt(breakdown.taxBeforeDeduction)}</span></div>
+            <div className="tax-row"><span className="tax-row-label">Estimated Tax (Gross)</span><span className="tax-row-value negative">−{fmt(breakdown.taxBeforeDeduction)}</span></div>
             {breakdown.negativeGearingRefund > 0 && (
               <div className="tax-row"><span className="tax-row-label">Tax Saved (Negative Gearing)</span><span className="tax-row-value positive">+{fmt(breakdown.negativeGearingRefund)}</span></div>
             )}
@@ -48,7 +48,7 @@ export function PersonalTaxBreakdown() {
           <div className="tax-row"><span className="tax-row-label">Gross Salary</span><span className="tax-row-value">{fmt(breakdown.recommendedSalary)}</span></div>
           <div className="tax-row"><span className="tax-row-label">Less Allocated Tax</span><span className="tax-row-value negative">−{fmt(breakdown.personalTaxOnSalary)}</span></div>
           <div className="tax-row" style={{ borderTop: '1px dashed var(--panel-border)', marginTop: '0.5rem', paddingTop: '0.5rem', fontWeight: 'bold' }}>
-            <span className="tax-row-label">Net Cash Salary</span>
+            <span className="tax-row-label">Est. Net Take-Home Salary</span>
             <span className="tax-row-value positive">{fmt(breakdown.afterTaxSalary)}</span>
           </div>
         </div>
