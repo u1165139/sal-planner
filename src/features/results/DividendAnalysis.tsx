@@ -16,13 +16,14 @@ export function DividendAnalysis() {
         <div className="tax-row"><span className="tax-row-label">+ Franking Credit (Tax Paid by Co)</span><span className="tax-row-value positive">{fmt(analysis.frankingCredit)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Grossed-up Dividend</span><span className="tax-row-value">{fmt(analysis.grossedUpDividend)}</span></div>
         <div className="tax-total">
-          <span className="tax-total-label">Dividend Top-Up Tax Owed</span>
-          <span className={`tax-row-value ${analysis.dividendTopUpTax > 0 ? 'negative' : ''}`}>
-            {analysis.dividendTopUpTax > 0 ? `−${fmt(analysis.dividendTopUpTax)}` : fmt(0)}
+          <span className="tax-total-label">
+            {analysis.dividendTopUpTax < 0 ? 'Franking Credit Refund' : 'Dividend Top-Up Tax Owed'}
+          </span>
+          <span className={`tax-row-value ${analysis.dividendTopUpTax < 0 ? 'positive' : (analysis.dividendTopUpTax > 0 ? 'negative' : '')}`}>
+            {analysis.dividendTopUpTax < 0 ? `+${fmt(Math.abs(analysis.dividendTopUpTax))}` : (analysis.dividendTopUpTax > 0 ? `−${fmt(analysis.dividendTopUpTax)}` : fmt(0))}
           </span>
         </div>
       </div>
     </div>
   );
 }
-

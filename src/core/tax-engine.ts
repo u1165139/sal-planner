@@ -191,7 +191,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   
   if (inputs.drawDividend) {
     const baseTaxWithoutDiv = calcTotalPersonalTax(Math.max(0, recommendedOwnerSalary + basePersonalTaxableIncome - annualDeductibleInvestmentLoss));
-    dividendTopUpTax = Math.max(0, personalTaxWith - baseTaxWithoutDiv - frankingCredit);
+    dividendTopUpTax = personalTaxWith - baseTaxWithoutDiv - frankingCredit;
   }
 
   const negativeGearingRefund = personalTaxWithout - personalTaxWith;

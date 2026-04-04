@@ -80,6 +80,8 @@ export const selectPersonalTaxBreakdown = createSelector(
       drawDividend: inputs.drawDividend,
       grossedUpDividend: results.grossedUpDividend,
       frankingCredit: results.frankingCredit,
+      personalTaxOnSalary: results.personalTaxOnSalary,
+      afterTaxSalary: results.afterTaxSalary,
     };
   }
 );
