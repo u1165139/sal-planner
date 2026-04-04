@@ -1,5 +1,4 @@
-﻿
-export interface CalcInputs {
+﻿export interface CalcInputs {
   businessIncomeGST: number;
   deductibleExpenses: number;
   monthlyLiving: number;
@@ -9,6 +8,8 @@ export interface CalcInputs {
   propertyIncome: number;
   maximiseSuper: boolean;
   drawDividend: boolean;
+  enableSpouseSplitting: boolean;
+  spouseOtherIncome: number;
 }
 
 export interface CalcResults {
@@ -25,6 +26,7 @@ export interface CalcResults {
   // Recommended salary
   recommendedSalary: number;
   superContribution: number;
+  spouseSalary: number;
   // Company tax
   companyTaxableProfit: number;
   companyTax: number;
@@ -35,6 +37,8 @@ export interface CalcResults {
   totalPersonalTaxableIncome: number;
   // Summary
   totalTax: number;
+  spouseTax: number;
+  totalFamilyTax: number;
   effectivePersonalRate: number;
   effectiveCompanyRate: number;
   // Cash flow

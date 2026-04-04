@@ -15,6 +15,8 @@ const DEFAULT_INPUTS: CalcInputs = {
   propertyIncome: 35000,
   maximiseSuper: false,
   drawDividend: false,
+  enableSpouseSplitting: false,
+  spouseOtherIncome: 0,
 };
 
 export function useSalaryOptimization() {

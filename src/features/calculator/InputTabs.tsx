@@ -132,6 +132,32 @@ export function InputTabs() {
           <div className={`toggle-switch ${inputs.drawDividend ? 'on' : ''}`} />
         </div>
       </div>
+
+      {/* Spouse Income Splitting */}
+      <div className="card section">
+        <div className="card-title"><span className="card-title-dot" />Spouse Income Splitting</div>
+        <div
+          className="toggle-row"
+          onClick={() => set('enableSpouseSplitting')(!inputs.enableSpouseSplitting)}
+          style={{ marginBottom: inputs.enableSpouseSplitting ? '1rem' : 0 }}
+        >
+          <div>
+            <div className="toggle-label">Enable Spouse Splitting</div>
+            <div className="toggle-sublabel">The calculator will optimize salary distribution between you and your spouse to minimize total tax paid.</div>
+          </div>
+          <div className={`toggle-switch ${inputs.enableSpouseSplitting ? 'on' : ''}`} />
+        </div>
+        
+        {inputs.enableSpouseSplitting && (
+          <InputField
+            label="Spouse's Other Annual Income"
+            sublabel="Base income before any company salary"
+            value={inputs.spouseOtherIncome}
+            onChange={set('spouseOtherIncome')}
+            error={getError('spouseOtherIncome')}
+          />
+        )}
+      </div>
     </>
   );
 }

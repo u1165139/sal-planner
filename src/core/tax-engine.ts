@@ -62,19 +62,77 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   // ── Negative gearing on investment loss ────────────────────────────────
   const annualDeductibleInvestmentLoss = monthlyDeductibleInvestmentLoss * 12;
 
+  const findBestSplit = (totalSalary: number) => {
+    let bestO = totalSalary;
+    let minTax = Infinity;
+    const spouseBase = inputs.spouseOtherIncome || 0;
+
+    const evaluate = (o: number) => {
+      const s = totalSalary - o;
+      const taxO = calcTotalPersonalTax(Math.max(0, o + basePersonalTaxableIncome - annualDeductibleInvestmentLoss));
+      const taxS = calcTotalPersonalTax(s + spouseBase);
+      return taxO + taxS;
+    };
+
+    const steps = 50;
+    for (let i = 0; i <= steps; i++) {
+      const o = (totalSalary * i) / steps;
+      const tax = evaluate(o);
+      if (tax < minTax) {
+        minTax = tax;
+        bestO = o;
+      }
+    }
+
+    const fineRange = totalSalary / steps;
+    const start = Math.max(0, bestO - fineRange);
+    const end = Math.min(totalSalary, bestO + fineRange);
+    for (let i = 0; i <= steps; i++) {
+      const o = start + ((end - start) * i) / steps;
+      const tax = evaluate(o);
+      if (tax <= minTax) {
+        minTax = tax;
+        bestO = o;
+      }
+    }
+
+    return { ownerSalary: bestO, spouseSalary: totalSalary - bestO };
+  };
+
   // ── Binary search for recommended salary ──────────────────────────────────
   const availableNonSalaryCash = interestIncome;
-  let recommendedSalary = 0;
+  let recommendedOwnerSalary = 0;
+  let recommendedSpouseSalary = 0;
+  let totalRecommendedSalary = 0;
 
-  const computeCash = (salary: number) => {
-    const grossIncome = salary + basePersonalTaxableIncome;
+  const computeCash = (totalSalary: number) => {
+    let ownerSal = totalSalary;
+    let spouseSal = 0;
+
+    if (inputs.enableSpouseSplitting) {
+      const split = findBestSplit(totalSalary);
+      ownerSal = split.ownerSalary;
+      spouseSal = split.spouseSalary;
+    }
+
+    const grossIncome = ownerSal + basePersonalTaxableIncome;
     const taxWithout = calcTotalPersonalTax(grossIncome);
     const taxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
     const ngRefund = taxWithout - taxWith;
     const taxOnBaseOnly = calcTotalPersonalTax(basePersonalTaxableIncome);
     const personalTaxOnSalary = taxWithout - taxOnBaseOnly;
-    const afterTax = salary - personalTaxOnSalary;
-    return { afterTax, ngRefund };
+    const afterTaxOwner = ownerSal - personalTaxOnSalary;
+
+    let afterTaxSpouse = 0;
+    if (inputs.enableSpouseSplitting) {
+      const sGross = spouseSal + (inputs.spouseOtherIncome || 0);
+      const sTax = calcTotalPersonalTax(sGross);
+      const sTaxBase = calcTotalPersonalTax(inputs.spouseOtherIncome || 0);
+      afterTaxSpouse = spouseSal - (sTax - sTaxBase);
+    }
+
+    const afterTax = afterTaxOwner + afterTaxSpouse;
+    return { afterTax, ngRefund, ownerSal, spouseSal };
   };
 
   const totalCashNeeded = requiredAnnualCash;
@@ -91,21 +149,28 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
       if (totalCash < totalCashNeeded) lo = mid;
       else hi = mid;
     }
-    recommendedSalary = (lo + hi) / 2;
+    totalRecommendedSalary = (lo + hi) / 2;
   }
 
-  recommendedSalary = Math.min(Math.max(0, recommendedSalary), Math.max(0, netBusinessProfit));
+  totalRecommendedSalary = Math.min(Math.max(0, totalRecommendedSalary), Math.max(0, netBusinessProfit));
+  const splitResult = computeCash(totalRecommendedSalary);
+  recommendedOwnerSalary = splitResult.ownerSal;
+  recommendedSpouseSalary = splitResult.spouseSal;
 
   // ── Super adjustment ───────────────────────────────────────────────────────
   let superContribution = 0;
   if (maximiseSuper) {
+    // Note: this logic assumes super is prioritized mostly for the owner up to the cap
     const maxSalaryWithSuper = Math.max(0, netBusinessProfit) / (1 + SUPER_RATE);
-    recommendedSalary = Math.min(recommendedSalary, maxSalaryWithSuper);
-    superContribution = Math.min(recommendedSalary * SUPER_RATE, SUPER_CAP);
+    totalRecommendedSalary = Math.min(totalRecommendedSalary, maxSalaryWithSuper);
+    const reSplit = computeCash(totalRecommendedSalary);
+    recommendedOwnerSalary = reSplit.ownerSal;
+    recommendedSpouseSalary = reSplit.spouseSal;
+    superContribution = Math.min(recommendedOwnerSalary * SUPER_RATE, SUPER_CAP);
   }
 
   // ── Final tax calculations ─────────────────────────────────────────────────
-  const companyTaxableProfit = Math.max(0, netBusinessProfit - recommendedSalary - superContribution);
+  const companyTaxableProfit = Math.max(0, netBusinessProfit - totalRecommendedSalary - superContribution);
   const companyTax = companyTaxableProfit * COMPANY_TAX_RATE;
   const companyAfterTaxProfit = companyTaxableProfit - companyTax;
 
@@ -120,12 +185,12 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     grossedUpDividend = netDividend + frankingCredit;
   }
 
-  const grossIncome = recommendedSalary + basePersonalTaxableIncome + grossedUpDividend;
+  const grossIncome = recommendedOwnerSalary + basePersonalTaxableIncome + grossedUpDividend;
   const personalTaxWithout = calcTotalPersonalTax(grossIncome);
   const personalTaxWith = calcTotalPersonalTax(Math.max(0, grossIncome - annualDeductibleInvestmentLoss));
   
   if (inputs.drawDividend) {
-    const baseTaxWithoutDiv = calcTotalPersonalTax(Math.max(0, recommendedSalary + basePersonalTaxableIncome - annualDeductibleInvestmentLoss));
+    const baseTaxWithoutDiv = calcTotalPersonalTax(Math.max(0, recommendedOwnerSalary + basePersonalTaxableIncome - annualDeductibleInvestmentLoss));
     dividendTopUpTax = Math.max(0, personalTaxWith - baseTaxWithoutDiv - frankingCredit);
   }
 
@@ -137,11 +202,23 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   const personalTaxOnSalary = personalTaxWithout - personalTaxOnBaseOnly;
   const totalPersonalTaxableIncome = Math.max(0, grossIncome - annualDeductibleInvestmentLoss);
 
-  const afterTaxSalary = recommendedSalary - personalTaxOnSalary;
+  const afterTaxOwnerSalary = recommendedOwnerSalary - personalTaxOnSalary;
+
+  let spouseTax = 0;
+  let afterTaxSpouseSalary = 0;
+  if (inputs.enableSpouseSplitting) {
+    const sGross = recommendedSpouseSalary + (inputs.spouseOtherIncome || 0);
+    const sTax = calcTotalPersonalTax(sGross);
+    const sTaxBase = calcTotalPersonalTax(inputs.spouseOtherIncome || 0);
+    spouseTax = sTax - sTaxBase;
+    afterTaxSpouseSalary = recommendedSpouseSalary - spouseTax;
+  }
+
+  const afterTaxSalary = afterTaxOwnerSalary + afterTaxSpouseSalary;
   const totalCashAvailable = afterTaxSalary + availableNonSalaryCash + negativeGearingRefund + netDividend - dividendTopUpTax;
   const cashShortfall = Math.max(0, requiredAnnualCash - availableNonSalaryCash - negativeGearingRefund - (netDividend - dividendTopUpTax));
   const cashSurplusDeficit = totalCashAvailable - requiredAnnualCash;
-  const totalTax = companyTax + personalTaxTotal;
+  const totalFamilyTax = companyTax + personalTaxTotal + spouseTax;
   const isHighTaxBracket = totalPersonalTaxableIncome > 190000;
 
   return {
@@ -153,7 +230,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     basePersonalTaxableIncome: ensureNumber(basePersonalTaxableIncome),
     annualDeductibleInvestmentLoss: ensureNumber(annualDeductibleInvestmentLoss),
     negativeGearingRefund: ensureNumber(negativeGearingRefund),
-    recommendedSalary: ensureNumber(recommendedSalary),
+    recommendedSalary: ensureNumber(recommendedOwnerSalary),
+    spouseSalary: ensureNumber(recommendedSpouseSalary),
     superContribution: ensureNumber(superContribution),
     companyTaxableProfit: ensureNumber(companyTaxableProfit),
     companyTax: ensureNumber(companyTax),
@@ -161,7 +239,9 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     personalTaxTotal: ensureNumber(personalTaxTotal),
     personalTaxOnSalary: ensureNumber(personalTaxOnSalary),
     totalPersonalTaxableIncome: ensureNumber(totalPersonalTaxableIncome),
-    totalTax: ensureNumber(totalTax),
+    totalTax: ensureNumber(companyTax + personalTaxTotal),
+    spouseTax: ensureNumber(spouseTax),
+    totalFamilyTax: ensureNumber(totalFamilyTax),
     effectivePersonalRate: ensureNumber((personalTaxTotal / grossIncome) * 100),
     effectiveCompanyRate: ensureNumber((companyTax / netBusinessProfit) * 100),
     afterTaxSalary: ensureNumber(afterTaxSalary),

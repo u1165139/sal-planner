@@ -17,6 +17,7 @@ export const selectHeroSummary = createSelector(
     if (!results) return null;
     return {
       recommendedSalary: results.recommendedSalary,
+      spouseSalary: results.spouseSalary,
       superContribution: results.superContribution,
       netBusinessProfit: results.netBusinessProfit,
       businessRevenue: results.businessRevenue,

@@ -9,17 +9,32 @@ export function Hero() {
 
   if (!summary) return null;
 
+  const hasSpouseSplit = summary.spouseSalary > 0;
+  const totalSalary = summary.recommendedSalary + summary.spouseSalary;
+
   return (
     <>
       <div className="hero-card section">
-        <div className="hero-eyebrow">Recommended Annual Salary</div>
+        <div className="hero-eyebrow">
+          {hasSpouseSplit ? 'Recommended Total Family Salary' : 'Recommended Annual Salary'}
+        </div>
         {summary.isHighTaxBracket && (
           <div className="high-tax-badge">
             <span>⚠️ High Tax Alert</span>
             <p>Income over $190k is taxed at 47%. Efficiency is low.</p>
           </div>
         )}
-      <div className={`hero-amount ${summary.isHighTaxBracket ? 'high-tax' : ''}`}><span>{fmt(summary.recommendedSalary)}</span></div>
+      <div className={`hero-amount ${summary.isHighTaxBracket ? 'high-tax' : ''}`}>
+        <span>{fmt(totalSalary)}</span>
+      </div>
+
+      {hasSpouseSplit && (
+        <div style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '0.8rem', textAlign: 'center' }}>
+          Owner: <strong>{fmt(summary.recommendedSalary)}</strong>&nbsp;·&nbsp;
+          Spouse: <strong>{fmt(summary.spouseSalary)}</strong>
+        </div>
+      )}
+
       {summary.maximiseSuper && summary.superContribution > 0 && (
         <div className="super-note">
           +&nbsp;<strong>{fmt(summary.superContribution)}</strong> employer super (SGC 11.5%) — deductible to company, not cash-in-hand
