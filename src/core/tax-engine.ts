@@ -455,7 +455,14 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     spouseSalary: ensureNumber(recommendedSpouseSalary),
     superContribution: ensureNumber(superContribution),
     ownerSuperAfterTax: ensureNumber((recommendedOwnerSalary * SUPER_RATE + finalSuperResult.ownerVoluntaryContribution) * (1 - SUPER_CONTRIBUTIONS_TAX)),
-    spouseSuperAfterTax: ensureNumber((recommendedSpouseSalary * SUPER_RATE + finalSuperResult.spouseVoluntaryContribution) * (1 - SUPER_CONTRIBUTIONS_TAX)),
+    spouseSuperAfterTax: ensureNumber(
+      (recommendedSpouseSalary * SUPER_RATE
+        + finalSuperResult.spouseVoluntaryContribution
+        + (inputs.spouseExternalSuperContribution > 0
+            ? inputs.spouseExternalSuperContribution
+            : (inputs.spouseOtherIncome || 0) * SUPER_RATE)
+      ) * (1 - SUPER_CONTRIBUTIONS_TAX)
+    ),
     companyTaxableProfit: ensureNumber(companyTaxableProfit),
     companyTax: ensureNumber(companyTax),
     companyAfterTaxProfit: ensureNumber(companyAfterTaxProfit),
