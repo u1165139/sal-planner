@@ -10,6 +10,7 @@
   drawDividend: boolean;
   jointOwnership: boolean;
   spouseOtherIncome: number;
+  spouseExternalSuperContribution: number;
   optimiseFamilyTax: boolean;
 }
 
@@ -30,6 +31,8 @@ export interface CalcResults {
   recommendedSalary: number;
   superContribution: number;
   spouseSalary: number;
+  ownerSuperAfterTax: number;
+  spouseSuperAfterTax: number;
   // Company tax
   companyTaxableProfit: number;
   companyTax: number;

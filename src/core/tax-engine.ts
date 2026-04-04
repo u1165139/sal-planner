@@ -5,6 +5,7 @@
   MEDICARE_RATE,
   SUPER_CAP,
   SUPER_RATE,
+  SUPER_CONTRIBUTIONS_TAX,
   PERSONAL_BRACKETS,
 } from './constants';
 import type { CalcInputs, CalcResults } from './types';
@@ -52,6 +53,7 @@ function calculateSuperContribution(
   spouseSalary: number,
   maximiseSuper: boolean,
   availableProfit: number,
+  spouseExternalSGC: number,
 ): SuperResult {
   // Mandatory SGC always applies on any salary drawn
   const ownerMandatory = ownerSalary * SUPER_RATE;
@@ -72,7 +74,7 @@ function calculateSuperContribution(
 
   // Voluntary top-up = gap between mandatory SGC and the cap, per person
   const ownerVoluntary = Math.max(0, ownerCap - ownerMandatory);
-  const spouseVoluntary = Math.max(0, spouseCap - spouseMandatory);
+  const spouseVoluntary = Math.max(0, spouseCap - spouseMandatory - spouseExternalSGC);
   const totalTarget = totalMandatory + ownerVoluntary + spouseVoluntary;
 
   // Can't contribute more than available profit allows
@@ -186,6 +188,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     recommendedSpouseSalary,
     maximiseSuper,
     availableProfitForSuper,
+    inputs.spouseExternalSuperContribution || 0,
   );
   let superContribution = superResult.superContribution;
 
@@ -302,7 +305,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
         // Company tax with new salary structure (salary is deductible pre-tax)
         const newAvailableForSuper = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal);
-        const newSuperContrib = calculateSuperContribution(minOwnerSal, spouseSal, maximiseSuper, newAvailableForSuper).superContribution;
+        const newSuperContrib = calculateSuperContribution(minOwnerSal, spouseSal, maximiseSuper, newAvailableForSuper, inputs.spouseExternalSuperContribution || 0).superContribution;
         const newCompanyTaxableProfit = Math.max(0, netBusinessProfit - minOwnerSal - spouseSal - newSuperContrib);
         const newCompanyTax = newCompanyTaxableProfit * COMPANY_TAX_RATE;
 
@@ -382,6 +385,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
           recommendedSpouseSalary,
           maximiseSuper,
           optimisedAvailableProfit,
+          inputs.spouseExternalSuperContribution || 0,
         );
         superContribution = optimisedSuperResult.superContribution;
 
@@ -433,7 +437,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   }
 
   const finalSuperResult = familyOptimisationActive && inputs.optimiseFamilyTax && inputs.jointOwnership
-    ? calculateSuperContribution(recommendedOwnerSalary, recommendedSpouseSalary, maximiseSuper, Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary))
+    ? calculateSuperContribution(recommendedOwnerSalary, recommendedSpouseSalary, maximiseSuper, Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary), inputs.spouseExternalSuperContribution || 0)
     : superResult;
 
   return {
@@ -450,6 +454,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     recommendedSalary: ensureNumber(recommendedOwnerSalary),
     spouseSalary: ensureNumber(recommendedSpouseSalary),
     superContribution: ensureNumber(superContribution),
+    ownerSuperAfterTax: ensureNumber((recommendedOwnerSalary * SUPER_RATE + finalSuperResult.ownerVoluntaryContribution) * (1 - SUPER_CONTRIBUTIONS_TAX)),
+    spouseSuperAfterTax: ensureNumber((recommendedSpouseSalary * SUPER_RATE + finalSuperResult.spouseVoluntaryContribution) * (1 - SUPER_CONTRIBUTIONS_TAX)),
     companyTaxableProfit: ensureNumber(companyTaxableProfit),
     companyTax: ensureNumber(companyTax),
     companyAfterTaxProfit: ensureNumber(companyAfterTaxProfit),

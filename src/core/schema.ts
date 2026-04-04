@@ -12,6 +12,7 @@ export const CalcInputsSchema = z.object({
   drawDividend: z.boolean(),
   jointOwnership: z.boolean(),
   spouseOtherIncome: z.number().min(0, "Spouse other income must be positive"),
+  spouseExternalSuperContribution: z.number().min(0),
   optimiseFamilyTax: z.boolean(),
 });
 

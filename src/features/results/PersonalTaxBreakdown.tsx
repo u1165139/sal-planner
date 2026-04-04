@@ -1,7 +1,9 @@
-﻿import { useTax } from '../../context/TaxContext';
+﻿import React from 'react';
+import { useTax } from '../../context/TaxContext';
 import { fmt, fmtPct } from '../../utils/formatters';
 import { calcTotalPersonalTax } from '../../core/tax-engine';
-import { SUPER_RATE } from '../../core/constants';
+import { SUPER_RATE, SUPER_CONTRIBUTIONS_TAX } from '../../core/constants';
+
 
 function TaxRow({ label, value, type }: { label: string; value: string; type?: 'neg' | 'pos' | 'gold' }) {
   return (
@@ -41,12 +43,13 @@ interface PersonColumnProps {
   isSplit?: boolean;
   mandatorySuper?: number;
   voluntarySuper?: number;
+  externalSGC?: number;
 }
 
 function PersonColumn({
   title, salary, otherIncome, interestIncome, propertyIncome, grossedUpDiv, showDiv,
   investmentLoss, grossIncome, netTaxable, ngRefund, frankingCredit, tax, effRate, afterTaxTotal, isSplit,
-  mandatorySuper, voluntarySuper
+  mandatorySuper, voluntarySuper, externalSGC
 }: PersonColumnProps) {
   return (
     <div style={{ flex: 1 }}>
@@ -72,20 +75,40 @@ function PersonColumn({
 
       <div style={{ background: 'rgba(167,139,250,0.1)', borderRadius: '6px', border: '1px solid rgba(167,139,250,0.2)', padding: '0.5rem 0.6rem', marginTop: '0.65rem' }}>
         <TaxRow label="Effective rate" value={fmtPct(effRate)} type="gold" />
-        {(mandatorySuper !== undefined && mandatorySuper > 0) && (
-          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
-            <span className="tax-row-label">Super (SGC)</span>
-            <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(mandatorySuper)}</span>
-          </div>
-        )}
-        {(voluntarySuper !== undefined && voluntarySuper > 0) && (
-          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
-            <span className="tax-row-label">Super (voluntary)</span>
-            <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(voluntarySuper)}</span>
-          </div>
-        )}
-        <div style={{ marginTop: '0.25rem' }}>
-          <TaxRow label="After-tax income" value={fmt(afterTaxTotal)} type="pos" />
+        {(mandatorySuper !== undefined && mandatorySuper > 0) && (() => {
+          const totalSuper = mandatorySuper + (voluntarySuper || 0) + (externalSGC || 0);
+          const superAfterTax = totalSuper * (1 - SUPER_CONTRIBUTIONS_TAX);
+          return (
+            <>
+              <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
+                <span className="tax-row-label">Super (SGC — guaranteed)</span>
+                <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(mandatorySuper)}</span>
+              </div>
+              {externalSGC !== undefined && externalSGC > 0 && (
+                <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
+                  <span className="tax-row-label">Super (SGC — regular employer)</span>
+                  <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(externalSGC)}</span>
+                </div>
+              )}
+              {voluntarySuper !== undefined && voluntarySuper > 0 && (
+                <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
+                  <span className="tax-row-label">Super (voluntary top-up)</span>
+                  <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(voluntarySuper)}</span>
+                </div>
+              )}
+              <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
+                <span className="tax-row-label" style={{ paddingLeft: '0.75rem', fontSize: '0.62rem' }}>
+                  Total after 15% contributions tax
+                </span>
+                <span className="tax-row-value" style={{ color: '#a78bfa', fontSize: '0.72rem' }}>{fmt(superAfterTax)}</span>
+              </div>
+            </>
+          );
+        })()}
+
+        <div className="tax-row total-row">
+          <span className="tax-row-label">Income</span>
+          <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(afterTaxTotal)}</span>
         </div>
       </div>
     </div>
@@ -162,6 +185,7 @@ export function PersonalTaxBreakdown() {
               afterTaxTotal={spouseAfterTaxTotal}
               mandatorySuper={results.spouseSalary * SUPER_RATE}
               voluntarySuper={results.spouseVoluntaryContribution}
+              externalSGC={inputs.spouseExternalSuperContribution || 0}
             />
           </>
         )}

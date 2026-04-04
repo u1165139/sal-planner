@@ -4,7 +4,8 @@ export const COMPANY_TAX_RATE = 0.25;
 export const MEDICARE_THRESHOLD = 26000
 export const MEDICARE_SHADING_RATE = 0.1;
 export const MEDICARE_RATE = 0.02;
-export const SUPER_CAP = 30000; // Concessional cap 2025-26
+export const SUPER_CAP = 30000; // Concessional contributions cap for FY24/25+
+export const SUPER_CONTRIBUTIONS_TAX = 0.15; // Tax on concessional contributions in fund
 export const SUPER_RATE = 0.12; // 12.0% SGC from 1 July 2025
 
 export const PERSONAL_BRACKETS: { min: number; max: number; rate: number }[] = [

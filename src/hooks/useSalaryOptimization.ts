@@ -16,7 +16,8 @@ const DEFAULT_INPUTS: CalcInputs = {
   drawDividend: false,
   jointOwnership: false,
   spouseOtherIncome: 0,
-  optimiseFamilyTax: false,
+  spouseExternalSuperContribution: 0,
+  optimiseFamilyTax: true,
 };
 
 export function useSalaryOptimization() {

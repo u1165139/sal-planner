@@ -57,6 +57,19 @@ export function WizardInput() {
         {explanation}
       </div>
       {renderInput("Spouse's employment income", 'Their salary or wages from their regular job', 'spouseOtherIncome', '/ yr')}
+      {inputs.maximiseSuper && (
+        <>
+          {renderInput(
+            "Spouse's employer super (annual)",
+            "SGC already paid by their regular employer — used to calculate remaining cap headroom",
+            'spouseExternalSuperContribution',
+            '/ yr',
+          )}
+          <div className="info-box" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
+            Defaults to 0 — enter their employer's SGC if known, or use {`${((inputs.spouseOtherIncome || 0) * 0.12).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })}`} (12% of their salary as an estimate).
+          </div>
+        </>
+      )}
       <div className="toggle-row" style={{ padding: '0.4rem 0.6rem', marginTop: '0.5rem', borderRadius: '6px', cursor: 'pointer' }} onClick={() => set('optimiseFamilyTax')(!inputs.optimiseFamilyTax)}>
         <div>
           <div className="toggle-label">Pay spouse to reduce family tax</div>

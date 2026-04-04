@@ -1,6 +1,7 @@
 ﻿import { useTax } from '../../context/TaxContext';
 import { selectCompanyTaxBreakdown } from '../../core/selectors';
 import { fmt } from '../../utils/formatters';
+import { SUPER_CONTRIBUTIONS_TAX } from '../../core/constants';
 
 export function CompanyTaxBreakdown() {
   const { inputs, results } = useTax();
@@ -41,13 +42,22 @@ export function CompanyTaxBreakdown() {
           )}
           {breakdown.maximiseSuper && breakdown.spouseVoluntaryContribution > 0 && (
             <div className="tax-row tax-row-indent">
-              <span className="tax-row-label">Spouse voluntary top-up</span>
-              <span className="tax-row-value negative">−{fmt(breakdown.spouseVoluntaryContribution)}</span>
+              <span className="tax-row-label">↳ Spouse voluntary top-up</span>
+              <span className="tax-row-value" style={{ color: '#a78bfa' }}>−{fmt(breakdown.spouseVoluntaryContribution)}</span>
+            </div>
+          )}
+          {(breakdown.ownerVoluntaryContribution > 0 || breakdown.spouseVoluntaryContribution > 0) && (
+            <div className="tax-row" style={{ fontSize: '0.72rem', opacity: 0.7 }}>
+              <span className="tax-row-label">Net into super (after 15% tax)</span>
+              <span className="tax-row-value" style={{ color: '#a78bfa' }}>
+                {fmt(breakdown.superContribution * (1 - SUPER_CONTRIBUTIONS_TAX))}
+              </span>
             </div>
           )}
         </>
       )}
-        <div className="tax-row"><span className="tax-row-label">Taxable Company Profit</span><span className="tax-row-value">{fmt(breakdown.companyTaxableProfit)}</span></div>
+
+      <div className="tax-row total-row"><span className="tax-row-label">Taxable Company Profit</span><span className="tax-row-value">{fmt(breakdown.companyTaxableProfit)}</span></div>
         <div className="tax-row"><span className="tax-row-label">Company Tax @ 25%</span><span className="tax-row-value negative">−{fmt(breakdown.companyTax)}</span></div>
         <div className="tax-total"><span className="tax-total-label">After-Tax Profit</span><span className="tax-row-value gold">{fmt(breakdown.companyAfterTaxProfit)}</span></div>
       </div>
