@@ -1,6 +1,7 @@
 ﻿import {
   COMPANY_TAX_RATE,
   MEDICARE_THRESHOLD,
+  MEDICARE_SHADING_RATE,
   MEDICARE_RATE,
   SUPER_CAP,
   SUPER_RATE,
@@ -25,7 +26,13 @@ export function calcPersonalIncomeTax(income: number): number {
 
 export function calcMedicare(income: number): number {
   if (income <= MEDICARE_THRESHOLD) return 0;
-  return (income - MEDICARE_THRESHOLD) * MEDICARE_RATE;
+
+  // Calculate the two possible levy amounts
+  const shadingLevy = (income - MEDICARE_THRESHOLD) * MEDICARE_SHADING_RATE;
+  const fullLevy = income * MEDICARE_RATE;
+
+  // The ATO charges the smaller of the two
+  return Math.min(shadingLevy, fullLevy);
 }
 
 export function calcTotalPersonalTax(income: number): number {

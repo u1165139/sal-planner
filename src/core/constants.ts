@@ -1,7 +1,8 @@
 ﻿// ─── CONSTANTS: Australian Tax Rates 2025-26 ─────────────────────────────────
 
 export const COMPANY_TAX_RATE = 0.25;
-export const MEDICARE_THRESHOLD = 18200;
+export const MEDICARE_THRESHOLD = 26000
+export const MEDICARE_SHADING_RATE = 0.1;
 export const MEDICARE_RATE = 0.02;
 export const SUPER_CAP = 30000; // Concessional cap 2025-26
 export const SUPER_RATE = 0.115; // 11.5% SGC
