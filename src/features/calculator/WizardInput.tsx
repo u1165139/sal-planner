@@ -8,7 +8,6 @@ export function WizardInput() {
 
   const [hasExistingProperty, setHasExistingProperty] = useState(true);
   const [hasNewProperty, setHasNewProperty] = useState(true);
-  const [newJoint, setNewJoint] = useState(false);
   const [interestOn, setInterestOn] = useState(inputs.interestIncome > 0);
 
   const renderInput = (label: string, sublabel: string, key: keyof typeof inputs, suffix = '/ yr') => (
@@ -52,12 +51,6 @@ export function WizardInput() {
     </div>
   );
 
-  const renderJointBody = (explanation: string) => (
-    <div style={{ fontSize: '0.67rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '0.25rem' }}>
-      {explanation}
-    </div>
-  );
-
   return (
     <div className="single-form">
 
@@ -94,7 +87,7 @@ export function WizardInput() {
           >Yes</button>
           <button
             className={`yn-btn${!hasExistingProperty ? ' sel' : ''}`}
-            onClick={() => { setHasExistingProperty(false); set('propertyIncome')(0); set('jointOwnership')(newJoint); }}
+            onClick={() => { setHasExistingProperty(false); set('propertyIncome')(0); }}
           >No</button>
         </div>
         {hasExistingProperty && (
@@ -120,7 +113,7 @@ export function WizardInput() {
           >Yes — model it</button>
           <button
             className={`yn-btn${!hasNewProperty ? ' sel' : ''}`}
-            onClick={() => { setHasNewProperty(false); set('monthlyDeductibleInvestmentLoss')(0); setNewJoint(false); set('jointOwnership')(false); }}
+            onClick={() => { setHasNewProperty(false); set('monthlyDeductibleInvestmentLoss')(0); set('jointOwnership')(false); }}
           >No, skip</button>
         </div>
         {hasNewProperty && (
@@ -129,18 +122,6 @@ export function WizardInput() {
             <div className="info-box">
               This shortfall is a deductible loss — it reduces your taxable income and generates a tax refund, which reduces the salary you need to draw.
             </div>
-            {renderToggleCard(
-              'Would this property be jointly owned with your spouse?',
-              'Splits the deductible loss 50/50 between you',
-              newJoint,
-              () => {
-                const next = !newJoint;
-                setNewJoint(next);
-                set('jointOwnership')(next);
-                if (next) set('hasSpouse')(true);
-              },
-              renderJointBody('Each person claims half the deductible loss on their own tax return.')
-            )}
           </>
         )}
       </div>
@@ -163,7 +144,6 @@ export function WizardInput() {
               set('spouseOtherIncome')(0);
               set('spouseExternalSuperContribution')(0);
               set('jointOwnership')(false);
-              setNewJoint(false);
             }
           }}
         >
@@ -177,6 +157,20 @@ export function WizardInput() {
         {inputs.hasSpouse && (
           <>
             {renderInput("Spouse's employment income", 'Their salary or wages from their regular job', 'spouseOtherIncome', '/ yr')}
+
+            {hasNewProperty && (
+              <div
+                className="toggle-row"
+                style={{ marginTop: '0.5rem', cursor: 'pointer' }}
+                onClick={() => set('jointOwnership')(!inputs.jointOwnership)}
+              >
+                <div>
+                  <div className="toggle-label">Would the new property be jointly owned?</div>
+                  <div className="toggle-sublabel">Splits the deductible loss 50/50 on your tax returns</div>
+                </div>
+                <div className={`toggle-switch ${inputs.jointOwnership ? 'on' : ''}`} />
+              </div>
+            )}
 
             {inputs.maximiseSuper && inputs.hasSpouse && (
               <>
