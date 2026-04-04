@@ -111,6 +111,8 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     maximiseSuper,
   } = inputs;
 
+  const hasSpouse = inputs.hasSpouse;
+
   // ── Base calculations ──────────────────────────────────────────────────────
   const businessRevenue = businessIncomeGST / 1.1;
   const netBusinessProfit = businessRevenue - deductibleExpenses;
@@ -144,7 +146,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
 
     let afterTaxSpouse = 0;
     let ngRefundSpouse = 0;
-    if (inputs.jointOwnership) {
+    if (hasSpouse) {
       const sGross = spouseSal + (inputs.spouseOtherIncome || 0);
       const sTaxWithout = calcTotalPersonalTax(sGross);
       const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
@@ -220,7 +222,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   let spouseNgRefund = 0;
   let spouseTax = 0;
   let afterTaxSpouseSalary = 0;
-  if (inputs.jointOwnership) {
+  if (hasSpouse) {
     const sGross = recommendedSpouseSalary + (inputs.spouseOtherIncome || 0);
     const sTaxWithout = calcTotalPersonalTax(sGross);
     const sTaxWith = calcTotalPersonalTax(Math.max(0, sGross - splitLossSpouse));
@@ -254,7 +256,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
   let familyOptimisationActive = false;
   let familyOptimisationMessage = '';
 
-  if (inputs.optimiseFamilyTax && inputs.jointOwnership) {
+  if (inputs.optimiseFamilyTax && hasSpouse) {
     const spouseBase = inputs.spouseOtherIncome || 0;
 
     // Owner's marginal rate on the current salary
@@ -436,7 +438,7 @@ export function calculateTaxStrategy(inputs: CalcInputs): CalcResults {
     }
   }
 
-  const finalSuperResult = familyOptimisationActive && inputs.optimiseFamilyTax && inputs.jointOwnership
+  const finalSuperResult = familyOptimisationActive && inputs.optimiseFamilyTax && hasSpouse
     ? calculateSuperContribution(recommendedOwnerSalary, recommendedSpouseSalary, maximiseSuper, Math.max(0, netBusinessProfit - recommendedOwnerSalary - recommendedSpouseSalary), inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : (inputs.spouseOtherIncome || 0) * SUPER_RATE)
     : superResult;
 

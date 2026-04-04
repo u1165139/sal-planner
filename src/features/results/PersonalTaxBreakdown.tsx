@@ -141,7 +141,7 @@ export function PersonalTaxBreakdown() {
 
   if (!results) return null;
 
-  const hasSpouse = inputs.jointOwnership;
+  const hasSpouse = inputs.hasSpouse;
 
   // Compute owner figures:
   const ownerGross = results.recommendedSalary + results.basePersonalTaxableIncome + (inputs.drawDividend ? results.grossedUpDividend : 0);

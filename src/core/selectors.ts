@@ -107,6 +107,7 @@ export const selectCashFlowSummary = createSelector(
       drawDividend: inputs.drawDividend,
       netDividend: results.netDividend,
       dividendTopUpTax: results.dividendTopUpTax,
+      hasSpouse: inputs.hasSpouse,
       jointOwnership: inputs.jointOwnership,
     };
   }

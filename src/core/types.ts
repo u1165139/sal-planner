@@ -8,6 +8,7 @@
   propertyIncome: number;
   maximiseSuper: boolean;
   drawDividend: boolean;
+  hasSpouse: boolean;
   jointOwnership: boolean;
   spouseOtherIncome: number;
   spouseExternalSuperContribution: number;
