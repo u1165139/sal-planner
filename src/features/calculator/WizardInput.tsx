@@ -124,7 +124,7 @@ export function WizardInput() {
             >Yes</button>
             <button
               className={`yn-btn${!hasExistingProperty ? ' sel' : ''}`}
-              onClick={() => { setHasExistingProperty(false); set('propertyIncome')(0); }}
+              onClick={() => { setHasExistingProperty(false); set('propertyIncome')(0); setStep(4); }}
             >No</button>
           </div>
 
@@ -172,7 +172,7 @@ export function WizardInput() {
             >Yes — model it</button>
             <button
               className={`yn-btn${!hasNewProperty ? ' sel' : ''}`}
-              onClick={() => { setHasNewProperty(false); set('monthlyDeductibleInvestmentLoss')(0); }}
+              onClick={() => { setHasNewProperty(false); set('monthlyDeductibleInvestmentLoss')(0); setStep(5); }}
             >No, skip</button>
           </div>
 
