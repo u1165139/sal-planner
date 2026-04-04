@@ -23,7 +23,7 @@ const DEFAULT_INPUTS: CalcInputs = {
 export function useSalaryOptimization() {
   const [inputs, setInputs] = useState<CalcInputs>(DEFAULT_INPUTS);
   const [debouncedInputs] = useDebounce(inputs, 250);
-  const [activeTab, setActiveTab] = useState<'business' | 'personal'>('business');
+  const [wizardStep, setWizardStep] = useState(1);
   const [validationErrors, setValidationErrors] = useState<InputValidationErrors | null>(null);
 
   const results = useMemo(() => {
@@ -46,5 +46,5 @@ export function useSalaryOptimization() {
     [],
   );
 
-  return { inputs, set, results, setInputs, activeTab, setActiveTab, validationErrors };
+  return { inputs, set, results, setInputs, wizardStep, setWizardStep, validationErrors };
 }
