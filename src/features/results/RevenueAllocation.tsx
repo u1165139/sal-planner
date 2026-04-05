@@ -10,10 +10,12 @@ export function RevenueAllocation() {
   const total = results.netBusinessProfit;
   if (total <= 0) return null;
 
-  const lifestyle = results.afterTaxSalary;
-  const superTax = results.superContribution * SUPER_CONTRIBUTIONS_TAX;
-  const superAfterTax = results.superContribution - superTax;
-  const taxPaid = results.personalTaxOnSalary + results.companyTax + superTax;
+  const lifestyle = results.afterTaxSalary + results.afterTaxSpouseSalary;
+  const superAfterTax = results.superContribution * (1 - SUPER_CONTRIBUTIONS_TAX);
+  const taxPaid = results.personalTaxOnSalary
+    + results.spouseTax
+    + results.companyTax
+    + results.superContribution * SUPER_CONTRIBUTIONS_TAX;
   const retained = results.companyAfterTaxProfit;
 
   const segments = [
@@ -58,9 +60,6 @@ export function RevenueAllocation() {
       </div>
 
       <div style={{ fontSize: '0.63rem', color: 'var(--panel-text-dim)', lineHeight: 1.5, marginTop: '0.85rem', borderTop: '1px solid var(--panel-border)', paddingTop: '0.65rem' }}>
-        {results.negativeGearingRefund > 0 && (
-          <>Tax shown net of <strong style={{ color: 'var(--panel-text-mid)' }}>{fmt(results.negativeGearingRefund)} NG refund</strong>. </>
-        )}
         Super shown after 15% contributions tax. Company profit stays in the business — extract later via dividend or salary.
       </div>
     </div>
