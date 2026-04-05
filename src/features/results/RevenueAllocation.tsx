@@ -10,13 +10,14 @@ export function RevenueAllocation() {
   const total = results.netBusinessProfit;
   if (total <= 0) return null;
 
-  const lifestyle = results.requiredAnnualCash;
-  const superAfterTax = results.superContribution * (1 - SUPER_CONTRIBUTIONS_TAX);
-  const taxPaid = results.personalTaxTotal + results.companyTax - results.negativeGearingRefund;
+  const lifestyle = results.afterTaxSalary;
+  const superTax = results.superContribution * SUPER_CONTRIBUTIONS_TAX;
+  const superAfterTax = results.superContribution - superTax;
+  const taxPaid = results.personalTaxOnSalary + results.companyTax + superTax;
   const retained = results.companyAfterTaxProfit;
 
   const segments = [
-    { label: 'Lifestyle costs',     value: lifestyle,    color: '#4ade80' },
+    { label: 'Cash to lifestyle',   value: lifestyle,    color: '#4ade80' },
     { label: 'Tax paid',            value: taxPaid,      color: '#f87171' },
     { label: 'Built in super',      value: superAfterTax, color: '#a78bfa' },
     { label: 'Retained in company', value: retained,     color: '#60a5fa' },
