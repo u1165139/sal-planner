@@ -1,6 +1,7 @@
 ﻿import { useTax } from '../../context/TaxContext';
 import { Hero } from './Hero';
 import { SummaryMetrics } from './SummaryMetrics';
+import { RevenueAllocation } from './RevenueAllocation';
 import { CompanyTaxBreakdown } from './CompanyTaxBreakdown';
 import { PersonalTaxBreakdown } from './PersonalTaxBreakdown';
 import { DividendAnalysis } from './DividendAnalysis';
@@ -22,6 +23,7 @@ export function ResultsDisplay() {
     <>
       <Hero />
       <SummaryMetrics />
+      <RevenueAllocation />
       <div className="grid-2 section">
         <CompanyTaxBreakdown />
         <PersonalTaxBreakdown />
