@@ -257,7 +257,6 @@ export function PersonalTaxBreakdown() {
               const spouseTotalTax = results.spouseTax + spouseTaxOnBase;
               const spouseEffRate = spouseGross > 0 ? (spouseTotalTax / spouseGross) * 100 : 0;
               const spouseAfterTaxTotal = spouseGross - spouseTotalTax;
-              const spouseCashInHand = results.spouseSalary > 0 ? results.afterTaxSpouseSalary : spouseAfterTaxTotal;
               const externalSGC = inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : spouseOtherIncome * SUPER_RATE;
               const companySGC = results.spouseSalary * SUPER_RATE;
               const spouseVol = results.spouseVoluntaryContribution;
@@ -278,9 +277,17 @@ export function PersonalTaxBreakdown() {
                     <span className="tax-row-value negative">−{fmt(spouseTotalTax)}</span>
                   </div>
 
-                  <div style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: '6px', padding: '0.45rem 0.65rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff' }}>Cash in hand</span>
-                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#4ade80' }}>{fmt(spouseCashInHand)}</span>
+                  <div style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: '6px', padding: '0.45rem 0.65rem', marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff' }}>Cash in hand</span>
+                      <span style={{ fontSize: '1rem', fontWeight: 700, color: '#4ade80' }}>{fmt(spouseAfterTaxTotal)}</span>
+                    </div>
+                    {results.spouseSalary > 0 && spouseOtherIncome > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '0.2rem' }}>
+                        <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>· from your company</span>
+                        <span style={{ fontSize: '0.67rem', color: 'rgba(74,222,128,0.6)' }}>{fmt(results.afterTaxSpouseSalary)}</span>
+                      </div>
+                    )}
                   </div>
 
                   {results.spouseNgRefund > 0 && (
