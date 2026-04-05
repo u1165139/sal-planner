@@ -1,6 +1,6 @@
 ﻿import { useTax } from '../../context/TaxContext';
 import { Hero } from './Hero';
-import { SummaryMetrics } from './SummaryMetrics';
+import { StrategyAdvisor } from './StrategyAdvisor';
 import { RevenueAllocation } from './RevenueAllocation';
 import { CompanyTaxBreakdown } from './CompanyTaxBreakdown';
 import { PersonalTaxBreakdown } from './PersonalTaxBreakdown';
@@ -22,14 +22,14 @@ export function ResultsDisplay() {
   return (
     <>
       <Hero />
-      <SummaryMetrics />
-      <RevenueAllocation />
+      <StrategyAdvisor />
       <div className="grid-2 section">
         <CompanyTaxBreakdown />
         <PersonalTaxBreakdown />
       </div>
-      <DividendAnalysis />
       <CashFlowCheck />
+      <RevenueAllocation />
+      <DividendAnalysis />
       <div className="footer">
         <p>For informational purposes only — not financial or tax advice.</p>
         <p>Consult a registered tax agent for advice specific to your circumstances.</p>

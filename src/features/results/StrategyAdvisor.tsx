@@ -34,7 +34,12 @@ export function StrategyAdvisor() {
   }
 
   return (
-    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem',
+      marginBottom: '0.75rem',
+    }}>
       {suggestions.map((s, i) => {
         const savesTax = s.taxDelta < -200;
         const addsWealth = s.wealthDelta > 200;
