@@ -31,6 +31,14 @@
   --green: #22c55e;
   --red: #f87171;
 
+  --color-accent: #a78bfa;
+  --color-accent-dim: rgba(167, 139, 250, 0.1);
+  --color-accent-border: rgba(167, 139, 250, 0.2);
+  --color-positive: #4ade80;
+  --color-positive-dim: rgba(74, 222, 128, 0.1);
+  --color-positive-border: rgba(74, 222, 128, 0.25);
+  --color-negative: #f87171;
+
   --font-head: 'Inter', sans-serif;
   --font-mono: 'Inter', sans-serif;
 }
@@ -710,3 +718,58 @@ body {
   transition: opacity 0.15s;
 }
 .btn-calculate:hover { opacity: 0.88; }
+
+/* ── Ledger table ── */
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  color: var(--panel-text-mid);
+}
+.ledger-table th {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.45);
+}
+.ledger-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.ledger-table tr:last-child td {
+  border-bottom: none;
+}
+.ledger-table td:last-child,
+.ledger-table th:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: var(--panel-text);
+  white-space: nowrap;
+}
+.ledger-table .subtotal-row td {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  border-bottom: 1px dashed rgba(255,255,255,0.2);
+  font-weight: 700;
+  color: var(--panel-text);
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.ledger-table .total-row td {
+  border-top: 2px solid rgba(167,139,250,0.5);
+  border-bottom: 2px double rgba(167,139,250,0.5);
+  background: rgba(167,139,250,0.1);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+.ledger-table .note-cell {
+  font-style: italic;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.4);
+}

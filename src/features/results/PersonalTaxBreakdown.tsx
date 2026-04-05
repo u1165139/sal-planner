@@ -18,7 +18,7 @@ function TaxRow({ label, value, type }: { label: string; value: string; type?: '
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0.65rem 0 0.25rem' }}>
+    <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0.65rem 0 0.25rem' }}>
       {children}
     </div>
   );
@@ -54,7 +54,7 @@ function PersonColumn({
 }: PersonColumnProps) {
   return (
     <div style={{ flex: 1 }}>
-      <div style={{ color: '#a78bfa', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, borderBottom: '1px solid rgba(167,139,250,0.3)', paddingBottom: '0.4rem', marginBottom: '0.5rem' }}>
+      <div style={{ color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, borderBottom: '1px solid var(--color-accent-border)', paddingBottom: '0.4rem', marginBottom: '0.5rem' }}>
         {title}
       </div>
       <SectionLabel>Income</SectionLabel>
@@ -74,7 +74,7 @@ function PersonColumn({
       {frankingCredit !== undefined && frankingCredit > 0 && <TaxRow label="Franking credit" value={`+${fmt(frankingCredit)}`} type="pos" />}
       <TaxRow label="Tax + Medicare" value={`−${fmt(tax)}`} type="neg" />
 
-      <div style={{ background: 'rgba(167,139,250,0.1)', borderRadius: '6px', border: '1px solid rgba(167,139,250,0.2)', padding: '0.5rem 0.6rem', marginTop: '0.65rem' }}>
+      <div style={{ background: 'var(--color-accent-dim)', borderRadius: '6px', border: '1px solid var(--color-accent-border)', padding: '0.5rem 0.6rem', marginTop: '0.65rem' }}>
         <TaxRow label="Effective rate" value={fmtPct(effRate)} type="gold" />
         {(mandatorySuper !== undefined && mandatorySuper > 0) && (() => {
           const totalSuper = mandatorySuper + (voluntarySuper || 0) + (externalSGC || 0);
@@ -83,25 +83,25 @@ function PersonColumn({
             <>
               <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
                 <span className="tax-row-label">Super (SGC — guaranteed)</span>
-                <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(mandatorySuper)}</span>
+                <span className="tax-row-value" style={{ color: 'var(--color-accent)' }}>{fmt(mandatorySuper)}</span>
               </div>
               {externalSGC !== undefined && externalSGC > 0 && (
                 <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
                   <span className="tax-row-label">Super (SGC — regular employer)</span>
-                  <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(externalSGC)}</span>
+                  <span className="tax-row-value" style={{ color: 'var(--color-accent)' }}>{fmt(externalSGC)}</span>
                 </div>
               )}
               {voluntarySuper !== undefined && voluntarySuper > 0 && (
                 <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
                   <span className="tax-row-label">Super (voluntary top-up)</span>
-                  <span className="tax-row-value" style={{ color: '#a78bfa' }}>{fmt(voluntarySuper)}</span>
+                  <span className="tax-row-value" style={{ color: 'var(--color-accent)' }}>{fmt(voluntarySuper)}</span>
                 </div>
               )}
               <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
                 <span className="tax-row-label" style={{ paddingLeft: '0.75rem', fontSize: '0.62rem' }}>
                   Total after 15% contributions tax
                 </span>
-                <span className="tax-row-value" style={{ color: '#a78bfa', fontSize: '0.72rem' }}>{fmt(superAfterTax)}</span>
+                <span className="tax-row-value" style={{ color: 'var(--color-accent)', fontSize: '0.72rem' }}>{fmt(superAfterTax)}</span>
               </div>
             </>
           );
@@ -109,7 +109,7 @@ function PersonColumn({
 
         {afterTaxSalary !== undefined && (
           <>
-            <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid rgba(167,139,250,0.2)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
+            <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid var(--color-accent-border)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
               <span className="tax-row-label" style={{ fontWeight: 600 }}>After-tax salary</span>
               <span className="tax-row-value positive" style={{ fontWeight: 600 }}>{fmt(afterTaxSalary)}</span>
             </div>
@@ -126,7 +126,7 @@ function PersonColumn({
           </>
         )}
         {afterTaxSalary === undefined && (
-          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid rgba(167,139,250,0.2)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
+          <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0', borderTop: '1px solid var(--color-accent-border)', marginTop: '0.25rem', paddingTop: '0.4rem' }}>
             <span className="tax-row-label" style={{ fontWeight: 600 }}>After-tax income</span>
             <span className="tax-row-value positive" style={{ fontWeight: 600 }}>{fmt(afterTaxTotal)}</span>
           </div>
@@ -177,7 +177,7 @@ export function PersonalTaxBreakdown() {
               style={{
                 fontSize: '0.62rem', fontWeight: 600, padding: '3px 10px',
                 borderRadius: '16px', cursor: 'pointer', whiteSpace: 'nowrap',
-                background: view === v ? '#a78bfa' : 'transparent',
+                background: view === v ? 'var(--color-accent)' : 'transparent',
                 color: view === v ? '#fff' : 'rgba(255,255,255,0.45)',
                 transition: 'all 0.15s',
               }}
@@ -194,57 +194,32 @@ export function PersonalTaxBreakdown() {
 
             {/* Owner summary column */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: '#a78bfa', textTransform: 'uppercase', fontSize: '0.72rem', fontWeight: 700, borderBottom: '1px solid rgba(167,139,250,0.3)', paddingBottom: '0.35rem', marginBottom: '0.6rem' }}>Owner</div>
+              <div style={{ color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.72rem', fontWeight: 700, borderBottom: '1px solid var(--color-accent-border)', paddingBottom: '0.35rem', marginBottom: '0.6rem' }}>Owner</div>
 
               <div className="tax-row"><span className="tax-row-label">Company salary</span><span className="tax-row-value">{fmt(results.recommendedSalary)}</span></div>
-              {inputs.propertyIncome > 0 && <div className="tax-row"><span className="tax-row-label">Rental income</span><span className="tax-row-value">{fmt(inputs.propertyIncome)}</span></div>}
-              {inputs.interestIncome > 0 && <div className="tax-row"><span className="tax-row-label">Interest income</span><span className="tax-row-value">{fmt(inputs.interestIncome)}</span></div>}
 
               <div className="tax-row">
                 <div>
                   <div className="tax-row-label">Income tax + Medicare</div>
-                  <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.35)', marginTop: '1px' }}>{fmtPct(results.effectivePersonalRate)} effective rate</div>
+                  <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '1px' }}>{fmtPct(results.effectivePersonalRate)} effective rate</div>
                 </div>
                 <span className="tax-row-value negative">−{fmt(results.personalTaxTotal)}</span>
               </div>
 
-              <div style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: '6px', padding: '0.45rem 0.65rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ background: 'var(--color-positive-dim)', border: '1px solid var(--color-positive-border)', borderRadius: '6px', padding: '0.45rem 0.65rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff' }}>Cash in hand</span>
-                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#4ade80' }}>{fmt(results.recommendedSalary - results.personalTaxOnSalary)}</span>
+                <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-positive)' }}>{fmt(results.recommendedSalary - results.personalTaxOnSalary)}</span>
               </div>
 
               {ownerNgRefund > 0 && (
-                <div style={{ background: 'rgba(74,222,128,0.07)', border: '1px solid rgba(74,222,128,0.18)', borderRadius: '6px', padding: '0.5rem 0.65rem', marginTop: '0.4rem', fontSize: '0.67rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.65)' }}>
-                  Investment property generates a <span style={{ color: '#4ade80', fontWeight: 600 }}>+{fmt(ownerNgRefund)} tax refund</span> — already reflected in the tax figure above.
+                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.65)', marginTop: '0.4rem', lineHeight: 1.5 }}>
+                  Investment property generates a{' '}
+                  <span style={{ color: 'var(--color-positive)', fontWeight: 600 }}>
+                    +{fmt(ownerNgRefund)} tax refund
+                  </span>{' '}
+                  — included in tax figure above.
                 </div>
               )}
-
-              <div style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '6px', padding: '0.5rem 0.6rem', marginTop: '0.4rem' }}>
-                {(() => {
-                  const sgc = results.recommendedSalary * SUPER_RATE;
-                  const vol = results.ownerVoluntaryContribution;
-                  const total = sgc + vol;
-                  const afterTax = total * (1 - SUPER_CONTRIBUTIONS_TAX);
-                  return (
-                    <>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', padding: '0.1rem 0' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>SGC (guaranteed)</span>
-                        <span style={{ color: '#a78bfa', fontWeight: 600 }}>{fmt(sgc)}</span>
-                      </div>
-                      {vol > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', padding: '0.1rem 0' }}>
-                          <span style={{ color: 'rgba(255,255,255,0.6)' }}>Voluntary top-up</span>
-                          <span style={{ color: '#a78bfa', fontWeight: 600 }}>{fmt(vol)}</span>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', padding: '0.1rem 0 0', borderTop: '1px solid rgba(167,139,250,0.15)', marginTop: '0.2rem' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>After 15% contributions tax</span>
-                        <span style={{ color: 'rgba(167,139,250,0.7)' }}>{fmt(afterTax)}</span>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
             </div>
 
             {hasSpouse && <div style={{ width: '1px', background: 'var(--panel-border)', alignSelf: 'stretch', flexShrink: 0 }} />}
@@ -257,69 +232,42 @@ export function PersonalTaxBreakdown() {
               const spouseTotalTax = results.spouseTax + spouseTaxOnBase;
               const spouseEffRate = spouseGross > 0 ? (spouseTotalTax / spouseGross) * 100 : 0;
               const spouseAfterTaxTotal = spouseGross - spouseTotalTax;
-              const externalSGC = inputs.spouseExternalSuperContribution > 0 ? inputs.spouseExternalSuperContribution : spouseOtherIncome * SUPER_RATE;
-              const companySGC = results.spouseSalary * SUPER_RATE;
-              const spouseVol = results.spouseVoluntaryContribution;
-              const spouseTotalSuper = companySGC + externalSGC + spouseVol;
-              const spouseSuperAfterTax = spouseTotalSuper * (1 - SUPER_CONTRIBUTIONS_TAX);
               return (
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#a78bfa', textTransform: 'uppercase', fontSize: '0.72rem', fontWeight: 700, borderBottom: '1px solid rgba(167,139,250,0.3)', paddingBottom: '0.35rem', marginBottom: '0.6rem' }}>Spouse</div>
+                  <div style={{ color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.72rem', fontWeight: 700, borderBottom: '1px solid var(--color-accent-border)', paddingBottom: '0.35rem', marginBottom: '0.6rem' }}>Spouse</div>
 
-                  {results.spouseSalary > 0 && <div className="tax-row"><span className="tax-row-label">Company salary</span><span className="tax-row-value">{fmt(results.spouseSalary)}</span></div>}
-                  {spouseOtherIncome > 0 && <div className="tax-row"><span className="tax-row-label">Regular employment</span><span className="tax-row-value">{fmt(spouseOtherIncome)}</span></div>}
+                  <div className="tax-row"><span className="tax-row-label">Salary {spouseOtherIncome > 0 ? '(all sources)' : '(company)'}</span><span className="tax-row-value">{fmt(spouseGross)}</span></div>
 
                   <div className="tax-row">
                     <div>
                       <div className="tax-row-label">Income tax + Medicare</div>
-                      <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.35)', marginTop: '1px' }}>{fmtPct(spouseEffRate)} effective rate</div>
+                      <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '1px' }}>{fmtPct(spouseEffRate)} effective rate</div>
                     </div>
                     <span className="tax-row-value negative">−{fmt(spouseTotalTax)}</span>
                   </div>
 
-                  <div style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: '6px', padding: '0.45rem 0.65rem', marginTop: '0.5rem' }}>
+                  <div style={{ background: 'var(--color-positive-dim)', border: '1px solid var(--color-positive-border)', borderRadius: '6px', padding: '0.45rem 0.65rem', marginTop: '0.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff' }}>Cash in hand</span>
-                      <span style={{ fontSize: '1rem', fontWeight: 700, color: '#4ade80' }}>{fmt(spouseAfterTaxTotal)}</span>
+                      <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-positive)' }}>{fmt(spouseAfterTaxTotal)}</span>
                     </div>
                     {results.spouseSalary > 0 && spouseOtherIncome > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '0.2rem' }}>
-                        <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>· from your company</span>
-                        <span style={{ fontSize: '0.67rem', color: 'rgba(74,222,128,0.6)' }}>{fmt(results.afterTaxSpouseSalary)}</span>
+                        <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>· from your company</span>
+                        <span style={{ fontSize: '0.72rem', color: 'rgba(74,222,128,0.6)' }}>{fmt(results.afterTaxSpouseSalary)}</span>
                       </div>
                     )}
                   </div>
 
                   {results.spouseNgRefund > 0 && (
-                    <div style={{ background: 'rgba(74,222,128,0.07)', border: '1px solid rgba(74,222,128,0.18)', borderRadius: '6px', padding: '0.5rem 0.65rem', marginTop: '0.4rem', fontSize: '0.67rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.65)' }}>
-                      Investment property generates a <span style={{ color: '#4ade80', fontWeight: 600 }}>+{fmt(results.spouseNgRefund)} tax refund</span> — already reflected in the tax figure above.
+                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.65)', marginTop: '0.4rem', lineHeight: 1.5 }}>
+                      Investment property generates a{' '}
+                      <span style={{ color: 'var(--color-positive)', fontWeight: 600 }}>
+                        +{fmt(results.spouseNgRefund)} tax refund
+                      </span>{' '}
+                      — included in tax figure above.
                     </div>
                   )}
-
-                  <div style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '6px', padding: '0.5rem 0.6rem', marginTop: '0.4rem' }}>
-                    {companySGC > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', padding: '0.1rem 0' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>SGC (company)</span>
-                        <span style={{ color: '#a78bfa', fontWeight: 600 }}>{fmt(companySGC)}</span>
-                      </div>
-                    )}
-                    {externalSGC > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', padding: '0.1rem 0' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>SGC (regular employer)</span>
-                        <span style={{ color: '#a78bfa', fontWeight: 600 }}>{fmt(externalSGC)}</span>
-                      </div>
-                    )}
-                    {spouseVol > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', padding: '0.1rem 0' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>Voluntary top-up</span>
-                        <span style={{ color: '#a78bfa', fontWeight: 600 }}>{fmt(spouseVol)}</span>
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', padding: '0.1rem 0 0', borderTop: '1px solid rgba(167,139,250,0.15)', marginTop: '0.2rem' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>After 15% contributions tax</span>
-                      <span style={{ color: 'rgba(167,139,250,0.7)' }}>{fmt(spouseSuperAfterTax)}</span>
-                    </div>
-                  </div>
                 </div>
               );
             })()}
@@ -329,20 +277,20 @@ export function PersonalTaxBreakdown() {
             const spouseTaxOnBase = calcTotalPersonalTax(inputs.spouseOtherIncome || 0);
             const spouseTotalTax = results.spouseTax + spouseTaxOnBase;
             return (
-              <div style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '6px', padding: '0.5rem 0.75rem', marginTop: '0.85rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(167,139,250,0.08)', border: '1px solid var(--color-accent-border)', borderRadius: '6px', padding: '0.5rem 0.75rem', marginTop: '0.85rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>Total family personal tax</span>
-                <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem' }}>−{fmt(ownerTax + spouseTotalTax)}</span>
+                <span style={{ color: 'var(--color-negative)', fontWeight: 700, fontSize: '0.85rem' }}>−{fmt(ownerTax + spouseTotalTax)}</span>
               </div>
             );
           })()}
 
           {inputs.optimiseFamilyTax && results.familyOptimisationMessage && (
-            <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', borderRadius: '6px', border: results.familyOptimisationActive ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.1)', background: results.familyOptimisationActive ? 'rgba(74,222,128,0.07)' : 'rgba(255,255,255,0.04)' }}>
+            <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', borderRadius: '6px', border: results.familyOptimisationActive ? '1px solid var(--color-positive-border)' : '1px solid rgba(255,255,255,0.1)', background: results.familyOptimisationActive ? 'var(--color-positive-dim)' : 'rgba(255,255,255,0.04)' }}>
               {results.familyOptimisationActive && (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--panel-text-mid)' }}>Potential family tax saving</span>
-                    <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#4ade80' }}>+{fmt(results.familyTaxSaving)}</span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-positive)' }}>+{fmt(results.familyTaxSaving)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--panel-text-mid)' }}>Suggested extra spouse salary</span>
@@ -350,7 +298,7 @@ export function PersonalTaxBreakdown() {
                   </div>
                 </>
               )}
-              <p style={{ fontSize: '0.67rem', color: 'var(--panel-text-dim)', lineHeight: 1.55, margin: 0 }}>{results.familyOptimisationMessage}</p>
+              <p style={{ fontSize: '0.72rem', color: 'var(--panel-text-dim)', lineHeight: 1.55, margin: 0 }}>{results.familyOptimisationMessage}</p>
             </div>
           )}
         </>
@@ -405,9 +353,9 @@ export function PersonalTaxBreakdown() {
       </div>
 
       {hasSpouse && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '6px', padding: '0.5rem 0.75rem', marginTop: '0.85rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(167,139,250,0.08)', border: '1px solid var(--color-accent-border)', borderRadius: '6px', padding: '0.5rem 0.75rem', marginTop: '0.85rem' }}>
           <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>Total family personal tax</span>
-          <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem' }}>−{fmt(ownerTax + spouseTotalTax)}</span>
+          <span style={{ color: 'var(--color-negative)', fontWeight: 700, fontSize: '0.85rem' }}>−{fmt(ownerTax + spouseTotalTax)}</span>
         </div>
       )}
 
@@ -417,10 +365,10 @@ export function PersonalTaxBreakdown() {
           padding: '0.65rem 0.85rem',
           borderRadius: '6px',
           border: results.familyOptimisationActive
-            ? '1px solid rgba(74,222,128,0.3)'
+            ? '1px solid var(--color-positive-border)'
             : '1px solid rgba(255,255,255,0.1)',
           background: results.familyOptimisationActive
-            ? 'rgba(74,222,128,0.07)'
+            ? 'var(--color-positive-dim)'
             : 'rgba(255,255,255,0.04)',
         }}>
           {results.familyOptimisationActive && (
@@ -433,7 +381,7 @@ export function PersonalTaxBreakdown() {
               <span style={{ fontSize: '0.72rem', color: 'var(--panel-text-mid)' }}>
                 Potential family tax saving
               </span>
-              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#4ade80' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-positive)' }}>
                 +{fmt(results.familyTaxSaving)}
               </span>
             </div>

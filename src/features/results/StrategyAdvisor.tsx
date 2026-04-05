@@ -36,65 +36,51 @@ export function StrategyAdvisor() {
   return (
     <div style={{
       display: 'flex',
-      flexDirection: 'column',
-      gap: '0.5rem',
+      flexWrap: 'wrap',
+      gap: '0.4rem',
       marginBottom: '0.75rem',
     }}>
       {suggestions.map((s, i) => {
         const savesTax = s.taxDelta < -200;
         const addsWealth = s.wealthDelta > 200;
 
+        let highlightText = '';
+        if (savesTax) highlightText = `saves ${fmt(Math.abs(s.taxDelta))} tax`;
+        else if (addsWealth) highlightText = `+${fmt(s.wealthDelta)} wealth`;
+
         return (
-          <div key={i} style={{
-            borderRadius: '8px',
-            border: '1px solid rgba(74,222,128,0.25)',
-            background: 'rgba(74,222,128,0.05)',
-            padding: '0.65rem 0.85rem',
+          <div key={i} title={s.description} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.35rem 0.4rem 0.35rem 0.65rem',
+            borderRadius: '20px',
+            background: 'rgba(74,222,128,0.06)',
+            border: '1px solid rgba(74,222,128,0.2)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff', marginBottom: '0.2rem' }}>
-                  💡 {s.label}
-                </div>
-                <div style={{ fontSize: '0.67rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.45, marginBottom: '0.4rem' }}>
-                  {s.description}
-                </div>
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  {savesTax && (
-                    <span style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 600 }}>
-                      Saves {fmt(Math.abs(s.taxDelta))} tax
-                    </span>
-                  )}
-                  {addsWealth && (
-                    <span style={{ fontSize: '0.7rem', color: '#a78bfa', fontWeight: 600 }}>
-                      +{fmt(s.wealthDelta)} total wealth
-                    </span>
-                  )}
-                  {savesTax && !addsWealth && (
-                    <span style={{ fontSize: '0.67rem', color: 'rgba(255,255,255,0.3)' }}>wealth unchanged</span>
-                  )}
-                  {!savesTax && addsWealth && (
-                    <span style={{ fontSize: '0.67rem', color: 'rgba(255,255,255,0.3)' }}>slight tax increase</span>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => apply(s.toggles as Record<string, unknown>)}
-                style={{
-                  flexShrink: 0,
-                  padding: '0.35rem 0.85rem',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(74,222,128,0.4)',
-                  background: 'rgba(74,222,128,0.12)',
-                  color: '#4ade80',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Apply
-              </button>
-            </div>
+            <span style={{ fontSize: '0.7rem', color: '#fff', whiteSpace: 'nowrap' }}>
+              💡 {s.label}
+              {highlightText && <span style={{ color: '#4ade80', fontWeight: 600, marginLeft: '0.3rem' }}>→ {highlightText}</span>}
+            </span>
+            <button
+              onClick={() => apply(s.toggles as Record<string, unknown>)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '1.4rem',
+                height: '1.4rem',
+                borderRadius: '50%',
+                background: 'rgba(74,222,128,0.15)',
+                border: 'none',
+                color: '#4ade80',
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              ✓
+            </button>
           </div>
         );
       })}
