@@ -1,6 +1,7 @@
 ﻿import { useTax } from '../../context/TaxContext';
 import { selectHeroSummary } from '../../core/selectors';
 import { fmt } from '../../utils/formatters';
+import { StrategyAdvisor } from './StrategyAdvisor';
 
 export function Hero() {
   const { inputs, results } = useTax();
@@ -43,6 +44,7 @@ export function Hero() {
       <div className="hero-sub">
         Net Business Profit (before salary):&nbsp;{fmt(summary.netBusinessProfit)}&nbsp;·&nbsp;Revenue ex-GST:&nbsp;{fmt(summary.businessRevenue)}
       </div>
+      <StrategyAdvisor />
       </div>
     </>
   );
