@@ -98,7 +98,7 @@ function PersonColumn({
                 </div>
               )}
               <div className="tax-row" style={{ borderBottom: 'none', padding: '0.1rem 0' }}>
-                <span className="tax-row-label" style={{ paddingLeft: '0.75rem', fontSize: '0.62rem' }}>
+                <span className="tax-row-label" style={{ paddingLeft: '0.75rem', fontSize: '0.72rem' }}>
                   Total after 15% contributions tax
                 </span>
                 <span className="tax-row-value" style={{ color: 'var(--color-accent)', fontSize: '0.72rem' }}>{fmt(superAfterTax)}</span>
@@ -115,7 +115,7 @@ function PersonColumn({
             </div>
             {afterTaxTotal !== afterTaxSalary && (
               <div className="tax-row" style={{ borderBottom: 'none', padding: '0.05rem 0' }}>
-                <span className="tax-row-label" style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>
+                <span className="tax-row-label" style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', paddingLeft: '0.5rem' }}>
                   incl. property &amp; NG effects
                 </span>
                 <span className="tax-row-value" style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>
